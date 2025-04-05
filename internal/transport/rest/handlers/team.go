@@ -126,3 +126,31 @@ func (h *TeamHandler) UpdateRole(c echo.Context) error {
 		Message: "Role updated successfully",
 	})
 }
+
+func (h *TeamHandler) DeleteRole(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	uuidID, err := uuid.Parse(id)
+	if err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	err = h.team.DeleteRole(uuidID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			code, msg := utils.NotFoundError()
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to delete role: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res.DeleteRoleRes{
+		Message: "Role deleted successfully",
+	})
+}

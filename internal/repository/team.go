@@ -49,3 +49,15 @@ func (r *TeamRepository) GetRoleByID(id uuid.UUID) (*models.Role, error) {
 func (r *TeamRepository) UpdateRole(role *models.Role) error {
 	return r.db.Table("roles").Where("id = ?", role.ID).Updates(role).Error
 }
+
+func (r *TeamRepository) DeleteRole(id uuid.UUID) error {
+	return r.db.Table("roles").Where("id = ?", id).Delete(&models.Role{}).Error
+}
+func (r *TeamRepository) GetUsersCountByRoleID(roleID uuid.UUID) (int64, error) {
+	var count int64
+	err := r.db.Table("users").Where("role_id = ?", roleID).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

@@ -67,3 +67,20 @@ func (s *TeamService) UpdateRole(id uuid.UUID, req *req.UpdateRoleReq) error {
 
 	return s.teamRepo.UpdateRole(roleInDB)
 }
+
+func (s *TeamService) DeleteRole(id uuid.UUID) error {
+	role, err := s.teamRepo.GetRoleByID(id)
+	if err != nil {
+		return err
+	}
+	if role == nil {
+		return fmt.Errorf("role with ID '%s' not found", id)
+	}
+
+	count, err := s.teamRepo.GetUsersCountByRoleID(id)
+	if count > 0 {
+		return fmt.Errorf("role with ID '%s' has users assigned", id)
+	}
+	return s.teamRepo.DeleteRole(id)
+
+}

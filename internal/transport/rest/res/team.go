@@ -13,3 +13,7 @@ type GetAllRolesRes struct {
 type UpdateRoleRes struct {
 	Message string `json:"message"`
 }
+
+type DeleteRoleRes struct {
+	Message string `json:"message"`
+}
