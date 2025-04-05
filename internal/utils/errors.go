@@ -64,3 +64,6 @@ func RateLimitExceededError() (int, *ErrorResponse) {
 func MethodNotAllowedError() (int, *ErrorResponse) {
 	return NewError(http.StatusMethodNotAllowed, "Method not allowed on this endpoint")
 }
+func ConflictCustomError(msg string) (int, *ErrorResponse) {
+	return NewError(http.StatusConflict, msg)
+}

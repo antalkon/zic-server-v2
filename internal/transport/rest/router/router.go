@@ -17,10 +17,13 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	ddbb := db.DB
 
 	authRepo := repository.NewAuthRepository(ddbb)
+	teamRepo := repository.NewTeamnRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
+	teamService := service.NewTeamService(teamRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
+	teamHandler := handlers.NewTeamHandler(teamService)
 
 	api := e.Group("/api/v1")
 	api.GET("/ping", handlers.Ping)
@@ -31,6 +34,14 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/sign-in", authHandler.SignInUser)
 		auth.POST("/refresh-token", authHandler.RefreshToken)
 		auth.POST("/sign-out", authHandler.SignOutUser)
+	}
+
+	data := api.Group("/data")
+	{
+		team := data.Group("/team")
+		{
+			team.POST("/role", teamHandler.CreateRole)
+		}
 	}
 
 }
