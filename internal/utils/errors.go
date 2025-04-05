@@ -2,53 +2,65 @@ package utils
 
 import "net/http"
 
-// ErrorResponse представляет формат ошибки в JSON
-//
-// swagger:model
 type ErrorResponse struct {
-	Message string `json:"message" example:"Error message"`
+	Message string `json:"message"`
 }
 
-// newError создает новый объект ошибки
-func newError(msg string) *ErrorResponse {
-	return &ErrorResponse{
-		Message: msg,
-	}
+// NewError возвращает объект ошибки с кодом
+func NewError(code int, msg string) (int, *ErrorResponse) {
+	return code, &ErrorResponse{Message: msg}
 }
 
-// BadRequestError возвращает 400 Bad Request
+// ----------------------------------------
+// Базовые статусы
+
 func BadRequestError() (int, *ErrorResponse) {
-	return http.StatusBadRequest, newError("Bad Request")
+	return NewError(http.StatusBadRequest, "Bad Request")
 }
 
-// NotFoundError возвращает 404 Not Found
 func NotFoundError() (int, *ErrorResponse) {
-	return http.StatusNotFound, newError("Not Found")
+	return NewError(http.StatusNotFound, "Resource not found")
 }
 
-// InternalServerError возвращает 500 Internal Server Error
-func InternalServerError(msg string) (int, *ErrorResponse) {
-	return http.StatusInternalServerError, newError(msg)
-}
-
-// ConflictError возвращает 409 Conflict
 func ConflictError() (int, *ErrorResponse) {
-	return http.StatusConflict, newError("Some fields can't be modified")
+	return NewError(http.StatusConflict, "Conflict: data already exists or violates constraints")
 }
 
-// MultipleLoginError возвращает ошибку уникальности логина
-func MultipleLoginError() *ErrorResponse {
-	return &ErrorResponse{
-		Message: "Login should be unique",
-	}
-}
-
-// UnauthorizedError возвращает 401 Unauthorized
 func UnauthorizedError() (int, *ErrorResponse) {
-	return http.StatusUnauthorized, newError("Unauthorized")
+	return NewError(http.StatusUnauthorized, "Unauthorized access")
 }
 
-// ForbiddenError возвращает 403 Forbidden
 func ForbiddenError() (int, *ErrorResponse) {
-	return http.StatusForbidden, newError("Forbidden")
+	return NewError(http.StatusForbidden, "Access forbidden")
+}
+
+func InternalServerError(msg string) (int, *ErrorResponse) {
+	return NewError(http.StatusInternalServerError, msg)
+}
+
+// ----------------------------------------
+// Дополнительные кастомные ошибки
+
+func ValidationError() (int, *ErrorResponse) {
+	return NewError(http.StatusBadRequest, "Validation failed")
+}
+
+func TokenExpiredError() (int, *ErrorResponse) {
+	return NewError(http.StatusUnauthorized, "Token expired or invalid")
+}
+
+func MissingTokenError() (int, *ErrorResponse) {
+	return NewError(http.StatusUnauthorized, "Missing refresh token")
+}
+
+func LoginAlreadyExistsError() (int, *ErrorResponse) {
+	return NewError(http.StatusConflict, "User with this login already exists")
+}
+
+func RateLimitExceededError() (int, *ErrorResponse) {
+	return NewError(http.StatusTooManyRequests, "Too many requests, please try again later")
+}
+
+func MethodNotAllowedError() (int, *ErrorResponse) {
+	return NewError(http.StatusMethodNotAllowed, "Method not allowed on this endpoint")
 }

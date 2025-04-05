@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"net/http"
+	"os"
+
 	"backend/internal/models"
 	"backend/internal/transport/rest/req"
 	"backend/internal/transport/rest/res"
 	"backend/internal/transport/service"
 	"backend/internal/utils"
-	"log"
-	"net/http"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -27,49 +28,98 @@ func NewAuthHandler(auth *service.AuthService) *AuthHandler {
 
 func (h *AuthHandler) SignUpUser(c echo.Context) error {
 	var client models.User
+
 	if err := c.Bind(&client); err != nil {
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
 	}
 
 	if err := h.validate.Struct(client); err != nil {
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.ValidationError()
+		return c.JSON(code, msg)
 	}
 
 	_, err := h.auth.SignUpClient(&client, c)
 	if err != nil {
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.ConflictError()
+		return c.JSON(code, msg)
 	}
 
 	return c.JSON(http.StatusCreated, res.SignUpRes{
-		Message: "User created successfully"})
+		Message: "User created successfully",
+	})
 }
 
 func (h *AuthHandler) SignInUser(c echo.Context) error {
 	var req req.SignInReq
+
 	if err := c.Bind(&req); err != nil {
-		log.Println("Bind error:", err)
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
 	}
 
 	if err := h.validate.Struct(req); err != nil {
-		log.Println("Validation error:", err)
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.ValidationError()
+		return c.JSON(code, msg)
 	}
-	client := models.User{
+
+	user := models.User{
 		Email:    req.Email,
 		Password: req.Password,
 	}
 
-	token, err := h.auth.SignInClient(&client, c)
+	tokens, err := h.auth.SignInClient(&user, c)
 	if err != nil {
-		log.Println("SignInClient error:", err)
-		return c.JSON(utils.BadRequestError())
+		code, msg := utils.UnauthorizedError()
+		return c.JSON(code, msg)
 	}
 
-	log.Println("User signed in successfully")
+	setAuthCookies(c, tokens)
 
 	return c.JSON(http.StatusOK, res.SignInRes{
-		Token:   token,
 		Message: "User signed in successfully",
+	})
+}
+
+func (h *AuthHandler) RefreshToken(c echo.Context) error {
+	cookie, err := c.Cookie("refresh_token")
+	if err != nil || cookie == nil || cookie.Value == "" {
+		return c.JSON(utils.MissingTokenError())
+	}
+
+	tokens, err := h.auth.RefreshToken(cookie.Value)
+	if err != nil {
+		return c.JSON(utils.InternalServerError("failed to refresh token: " + err.Error()))
+	}
+
+	setAuthCookies(c, tokens)
+
+	return c.JSON(http.StatusOK, res.SignInRes{
+		Message: "Tokens updated successfully",
+	})
+}
+
+// setAuthCookies устанавливает access/refresh токены в куки
+func setAuthCookies(c echo.Context, tokens models.AuthTokens) {
+	isDev := os.Getenv("APP_ENV") == "development"
+
+	c.SetCookie(&http.Cookie{
+		Name:     "access_token",
+		Value:    tokens.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDev,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600,
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !isDev,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   60 * 60 * 24 * 30, // 30 дней
 	})
 }
