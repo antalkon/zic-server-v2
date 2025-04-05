@@ -33,11 +33,10 @@ func GenerateJWT(userID uuid.UUID) (string, error) {
 	fmt.Println("Generated Token:", signedToken)
 	return signedToken, nil
 }
-
 func DecodeJWT(tokenStr string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		return SecretKey, nil
+		return []byte(SecretKey), nil // ✅ фикс
 	})
 	if err != nil {
 		return nil, err

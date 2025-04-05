@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend/internal/repository"
+	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
 	"backend/pkg/cache"
@@ -25,6 +26,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
 
+	authMiddleware := middleware.NewAuthMiddleware(authRepo)
+
 	api := e.Group("/api/v1")
 	api.GET("/ping", handlers.Ping)
 
@@ -37,11 +40,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	}
 
 	data := api.Group("/data")
+	data.Use(authMiddleware.AuthRequired())
 	{
 		team := data.Group("/team")
 		{
 			team.POST("/role", teamHandler.CreateRole)
 		}
 	}
-
 }
