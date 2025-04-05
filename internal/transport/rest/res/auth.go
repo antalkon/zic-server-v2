@@ -9,3 +9,7 @@ type SignInRes struct {
 	Token   string `json:"token"`
 	Message string `json:"message"`
 }
+
+type SignOutRes struct {
+	Message string `json:"message"`
+}

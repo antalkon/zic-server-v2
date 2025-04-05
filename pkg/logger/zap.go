@@ -34,15 +34,19 @@ func NewLogger(env string) *Logger {
 func (l *Logger) WithEchoMiddleware() func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			err := next(c)
+
 			req := c.Request()
 			resp := c.Response()
-			l.Info("Request received",
+
+			l.Info("Request handled",
 				zap.String("method", req.Method),
 				zap.String("path", req.URL.Path),
 				zap.Int("status", resp.Status),
 				zap.String("remote_ip", c.RealIP()),
 			)
-			return next(c)
+
+			return err
 		}
 	}
 }

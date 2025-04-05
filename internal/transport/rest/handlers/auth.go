@@ -99,6 +99,44 @@ func (h *AuthHandler) RefreshToken(c echo.Context) error {
 	})
 }
 
+func (h *AuthHandler) SignOutUser(c echo.Context) error {
+	cookie, err := c.Cookie("refresh_token")
+	if err != nil || cookie.Value == "" {
+		return c.JSON(utils.MissingTokenError())
+	}
+
+	// Удаляем refresh токен из БД
+	if err := h.auth.SignOut(cookie.Value); err != nil {
+		return c.JSON(utils.InternalServerError("failed to sign out: " + err.Error()))
+	}
+
+	// Чистим refresh_token cookie
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	// Чистим access_token cookie
+	c.SetCookie(&http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return c.JSON(http.StatusOK, res.SignOutRes{
+		Message: "User signed out successfully",
+	})
+}
+
 // setAuthCookies устанавливает access/refresh токены в куки
 func setAuthCookies(c echo.Context, tokens models.AuthTokens) {
 	isDev := os.Getenv("APP_ENV") == "development"

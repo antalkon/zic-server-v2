@@ -113,6 +113,28 @@ func (s *AuthService) RefreshToken(jwtStr string) (models.AuthTokens, error) {
 	return s.issueTokens(user.ID)
 }
 
+func (s *AuthService) SignOut(jwtStr string) error {
+	claims, err := tokenjwt.DecodeRefreshJWT(jwtStr)
+	if err != nil {
+		return fmt.Errorf("invalid refresh token: %w", err)
+	}
+	refreshID, err := uuid.Parse(claims.RefreshId)
+	if err != nil {
+		return fmt.Errorf("invalid refresh token ID: %w", err)
+	}
+	refresh, err := s.authRepo.GetRefreshTokenById(refreshID)
+	if err != nil {
+		return fmt.Errorf("failed to get refresh token: %w", err)
+	}
+	if refresh == nil {
+		return errors.New("refresh token not found")
+	}
+	if err := s.authRepo.DeleteRefreshToken(refreshID); err != nil {
+		return fmt.Errorf("failed to delete refresh token: %w", err)
+	}
+	return nil
+}
+
 // issueTokens — генерация и сохранение пары access/refresh токенов
 func (s *AuthService) issueTokens(userID uuid.UUID) (models.AuthTokens, error) {
 	accessToken, err := tokenjwt.GenerateJWT(userID)

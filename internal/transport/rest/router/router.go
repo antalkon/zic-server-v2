@@ -30,6 +30,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/sign-up", authHandler.SignUpUser)
 		auth.POST("/sign-in", authHandler.SignInUser)
 		auth.POST("/refresh-token", authHandler.RefreshToken)
+		auth.POST("/sign-out", authHandler.SignOutUser)
 	}
 
 }
