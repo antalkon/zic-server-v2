@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,4 +28,24 @@ func (r *TeamRepository) RoleExistsByName(name string) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+func (r *TeamRepository) GetAllRoles() ([]models.Role, error) {
+	var roles []models.Role
+	err := r.db.Table("roles").Find(&roles).Error
+	if err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+func (r *TeamRepository) GetRoleByID(id uuid.UUID) (*models.Role, error) {
+	var role models.Role
+	err := r.db.Table("roles").Where("id = ?", id).First(&role).Error
+	if err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
+
+func (r *TeamRepository) UpdateRole(role *models.Role) error {
+	return r.db.Table("roles").Where("id = ?", role.ID).Updates(role).Error
 }
