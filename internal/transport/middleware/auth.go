@@ -46,7 +46,16 @@ func (m *AuthMiddleware) AuthRequired() echo.MiddlewareFunc {
 				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
 			}
 
+			// Получаем роль пользователя
+			role, err := m.authRepo.GetUserRole(user.RoleID)
+			if err != nil {
+				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+			}
+
+			// Устанавливаем ID пользователя и роль в контекст
 			c.Set("user_id", user.ID)
+			c.Set("user_role", role.Name)
+
 			return next(c)
 		}
 	}

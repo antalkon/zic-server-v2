@@ -61,3 +61,14 @@ func (r *TeamRepository) GetUsersCountByRoleID(roleID uuid.UUID) (int64, error) 
 	}
 	return count, nil
 }
+func (r *TeamRepository) UserExistsByEmail(email string) (bool, error) {
+	var count int64
+	err := r.db.Table("users").Where("email = ?", email).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+func (r *TeamRepository) CreateUser(user *models.User) error {
+	return r.db.Table("users").Create(user).Error
+}

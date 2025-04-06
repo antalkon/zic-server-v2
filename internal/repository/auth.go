@@ -87,3 +87,14 @@ func (r *AuthRepository) GetUserById(id uuid.UUID) (*models.User, error) {
 func (r *AuthRepository) DeleteRefreshToken(tokenId uuid.UUID) error {
 	return r.db.Where("id = ?", tokenId).Delete(&models.RefreshToken{}).Error
 }
+
+func (r *AuthRepository) GetUserRole(roleID uuid.UUID) (*models.Role, error) {
+	var role models.Role
+
+	err := r.db.First(&role, "id = ?", roleID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}

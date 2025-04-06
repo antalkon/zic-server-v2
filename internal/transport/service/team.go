@@ -4,6 +4,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repository"
 	"backend/internal/transport/rest/req"
+	"backend/pkg/hash"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -83,4 +84,26 @@ func (s *TeamService) DeleteRole(id uuid.UUID) error {
 	}
 	return s.teamRepo.DeleteRole(id)
 
+}
+
+func (s *TeamService) CreateUser(user *models.User, role string) error {
+	if role != "admin" {
+		return fmt.Errorf("only admin can create users")
+	}
+	exists, err := s.teamRepo.UserExistsByEmail(user.Email)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("user with email '%s' already exists", user.Email)
+	}
+	passwordHash, err := hash.GenerateHash(user.Password)
+	if err != nil {
+		return err
+	}
+
+	user.ID = uuid.New()
+	user.PasswordHash = passwordHash
+
+	return s.teamRepo.CreateUser(user)
 }

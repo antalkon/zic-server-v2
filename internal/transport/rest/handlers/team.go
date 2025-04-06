@@ -154,3 +154,32 @@ func (h *TeamHandler) DeleteRole(c echo.Context) error {
 		Message: "Role deleted successfully",
 	})
 }
+
+func (h *TeamHandler) CreateUser(c echo.Context) error {
+	var user models.User
+
+	if err := c.Bind(&user); err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	if err := h.validate.Struct(user); err != nil {
+		code, msg := utils.ValidationError()
+		return c.JSON(code, msg)
+	}
+	userRole := c.Get("user_role").(string)
+
+	err := h.team.CreateUser(&user, userRole)
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			code, msg := utils.ConflictCustomError("User with this email already exists")
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to create user: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusCreated, res.CreateRoleRes{
+		Message: "User created successfully",
+	})
+}
