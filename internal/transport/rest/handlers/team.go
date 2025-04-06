@@ -183,3 +183,138 @@ func (h *TeamHandler) CreateUser(c echo.Context) error {
 		Message: "User created successfully",
 	})
 }
+
+func (h *TeamHandler) GetAllUsers(c echo.Context) error {
+	users, err := h.team.GetAllUsers()
+	if err != nil {
+		code, msg := utils.InternalServerError("failed to get users: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res.GetAllUsersRes{
+		Users: users,
+	})
+}
+func (h *TeamHandler) GetUserByID(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	uuidID, err := uuid.Parse(id)
+	if err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	user, err := h.team.GetUserByID(uuidID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			code, msg := utils.NotFoundError()
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to get user: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
+func (h *TeamHandler) UpdateUser(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	uuidID, err := uuid.Parse(id)
+	if err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	var req req.UpdateUserReq
+	if err := c.Bind(&req); err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+	userRole := c.Get("user_role").(string)
+
+	err = h.team.UpdateUser(uuidID, &req, userRole)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			code, msg := utils.NotFoundError()
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to update user: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res.UpdateRoleRes{
+		Message: "User updated successfully",
+	})
+}
+
+func (h *TeamHandler) DeleteUser(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+	userRole := c.Get("user_role").(string)
+
+	uuidID, err := uuid.Parse(id)
+	if err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	err = h.team.DeleteUser(uuidID, userRole)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			code, msg := utils.NotFoundError()
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to delete user: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res.DeleteRoleRes{
+		Message: "User deleted successfully",
+	})
+}
+
+func (h *TeamHandler) UpdatePassword(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	uuidID, err := uuid.Parse(id)
+	if err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	var req req.UpdatePasswordReq
+	if err := c.Bind(&req); err != nil {
+		code, msg := utils.BadRequestError()
+		return c.JSON(code, msg)
+	}
+
+	err = h.team.UpdatePassword(uuidID, &req)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			code, msg := utils.NotFoundError()
+			return c.JSON(code, msg)
+		}
+		code, msg := utils.InternalServerError("failed to update password: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res.UpdateRoleRes{
+		Message: "Password updated successfully",
+	})
+}

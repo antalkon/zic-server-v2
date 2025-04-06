@@ -17,3 +17,7 @@ type UpdateRoleRes struct {
 type DeleteRoleRes struct {
 	Message string `json:"message"`
 }
+
+type GetAllUsersRes struct {
+	Users []models.User `json:"users"`
+}

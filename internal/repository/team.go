@@ -72,3 +72,33 @@ func (r *TeamRepository) UserExistsByEmail(email string) (bool, error) {
 func (r *TeamRepository) CreateUser(user *models.User) error {
 	return r.db.Table("users").Create(user).Error
 }
+
+func (r *TeamRepository) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+	err := r.db.Preload("Role").Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+func (r *TeamRepository) GetUserByID(id uuid.UUID) (*models.User, error) {
+	var user models.User
+	err := r.db.Preload("Role").First(&user, "id = ?", id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *TeamRepository) UpdateUser(user *models.User) error {
+	return r.db.Table("users").Where("id = ?", user.ID).Updates(user).Error
+}
+func (r *TeamRepository) DeleteUser(id uuid.UUID) error {
+	// Удаляем сначала токены
+	if err := r.db.Where("user_id = ?", id).Delete(&models.RefreshToken{}).Error; err != nil {
+		return err
+	}
+
+	// Потом сам юзер
+	return r.db.Where("id = ?", id).Delete(&models.User{}).Error
+}

@@ -50,6 +50,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			team.PUT("/role/:id", teamHandler.UpdateRole)
 			team.DELETE("/role/:id", teamHandler.DeleteRole) // Доработать + проверка на наличие юзеров
 			team.POST("/user", teamHandler.CreateUser)
+			team.GET("/user", teamHandler.GetAllUsers)     // Доработать + стат
+			team.GET("/user/:id", teamHandler.GetUserByID) // Доработать + стат
+			team.PUT("/user/:id", teamHandler.UpdateUser)
+			team.DELETE("/user/:id", teamHandler.DeleteUser) // Доработать + проверка на наличие юзеров
+			team.POST("/user/password/:id", teamHandler.UpdatePassword)
 		}
 	}
 }

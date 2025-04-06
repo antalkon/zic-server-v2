@@ -107,3 +107,93 @@ func (s *TeamService) CreateUser(user *models.User, role string) error {
 
 	return s.teamRepo.CreateUser(user)
 }
+
+func (s *TeamService) GetAllUsers() ([]models.User, error) {
+	users, err := s.teamRepo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (s *TeamService) GetUserByID(id uuid.UUID) (*models.User, error) {
+	user, err := s.teamRepo.GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, fmt.Errorf("user with ID '%s' not found", id.String())
+	}
+	return user, nil
+}
+
+func (s *TeamService) UpdateUser(id uuid.UUID, req *req.UpdateUserReq, role string) error {
+	userInDB, err := s.teamRepo.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+	if userInDB == nil {
+		return fmt.Errorf("user with ID '%s' not found", id)
+	}
+	if role != "admin" {
+		return fmt.Errorf("only admin can create users")
+	}
+	if req.Name != nil {
+		userInDB.Name = *req.Name
+	}
+	if req.Surname != nil {
+		userInDB.Surname = *req.Surname
+	}
+	if req.Email != nil {
+		userInDB.Email = *req.Email
+	}
+	if req.Phone != nil {
+		userInDB.Phone = *req.Phone
+	}
+	if req.Role != nil {
+		role, err := s.teamRepo.GetRoleByID(uuid.MustParse(*req.Role))
+		if err != nil {
+			return err
+		}
+		if role == nil {
+			return fmt.Errorf("role with ID '%s' not found", *req.Role)
+		}
+		userInDB.RoleID = role.ID
+	}
+
+	return s.teamRepo.UpdateUser(userInDB)
+}
+
+func (s *TeamService) DeleteUser(id uuid.UUID, role string) error {
+	user, err := s.teamRepo.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fmt.Errorf("user with ID '%s' not found", id)
+	}
+	if role != "admin" {
+		return fmt.Errorf("only admin can create users")
+	}
+
+	return s.teamRepo.DeleteUser(id)
+}
+
+func (s *TeamService) UpdatePassword(id uuid.UUID, req *req.UpdatePasswordReq) error {
+	userInDB, err := s.teamRepo.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+	if userInDB == nil {
+		return fmt.Errorf("user with ID '%s' not found", id)
+	}
+
+	passwordHash, err := hash.GenerateHash(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	userInDB.PasswordHash = passwordHash
+
+	return s.teamRepo.UpdateUser(userInDB)
+}
