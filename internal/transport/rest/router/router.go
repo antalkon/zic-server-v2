@@ -21,16 +21,19 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	teamRepo := repository.NewTeamnRepository(ddbb)
 	userRepo := repository.NewUserRepository(ddbb)
 	roomRepo := repository.NewRoomRepository(ddbb)
+	computerRepo := repository.NewComputerRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
 	userService := service.NewUserService(userRepo)
 	roomService := service.NewRoomService(roomRepo)
+	computerService := service.NewComputerService(computerRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
 	userHandler := handlers.NewUserHandler(userService)
 	roomHandler := handlers.NewRoomHandler(roomService)
+	computerHandler := handlers.NewComputerHandler(computerService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -75,6 +78,15 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			room.GET("/:id", roomHandler.GetRoomByID)
 			room.PUT("/:id", roomHandler.UpdateRoom)    // Доработать + стат
 			room.DELETE("/:id", roomHandler.DeleteRoom) // Доработать + проверка на наличие юзеров
+		}
+		computer := data.Group("/pc")
+		{
+			computer.POST("", computerHandler.CreateComputer)
+			computer.GET("", computerHandler.GetAllComputers) // Доработать + стат
+			computer.GET("/:id", computerHandler.GetComputerByID)
+			computer.PUT("/:id", computerHandler.UpdateComputer)           // Доработать + стат
+			computer.GET("/room/:id", computerHandler.GetRoomComputersAll) // Доработать + стат
+			computer.DELETE("/:id", computerHandler.DeleteComputer)        // Доработать + проверка на наличие юзеров
 		}
 	}
 }
