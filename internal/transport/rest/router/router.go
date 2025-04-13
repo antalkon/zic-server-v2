@@ -19,12 +19,15 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 
 	authRepo := repository.NewAuthRepository(ddbb)
 	teamRepo := repository.NewTeamnRepository(ddbb)
+	userRepo := repository.NewUserRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
+	userService := service.NewUserService(userRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -55,6 +58,10 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			team.PUT("/user/:id", teamHandler.UpdateUser)
 			team.DELETE("/user/:id", teamHandler.DeleteUser) // Доработать + проверка на наличие юзеров
 			team.POST("/user/password/:id", teamHandler.UpdatePassword)
+		}
+		user := data.Group("/user")
+		{
+			user.GET("/data", userHandler.GetUserByID) // Получение данных пользователя, в т.ч. ролей и прав
 		}
 	}
 }
