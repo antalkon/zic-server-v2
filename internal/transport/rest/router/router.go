@@ -20,14 +20,17 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	authRepo := repository.NewAuthRepository(ddbb)
 	teamRepo := repository.NewTeamnRepository(ddbb)
 	userRepo := repository.NewUserRepository(ddbb)
+	roomRepo := repository.NewRoomRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
 	userService := service.NewUserService(userRepo)
+	roomService := service.NewRoomService(roomRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
 	userHandler := handlers.NewUserHandler(userService)
+	roomHandler := handlers.NewRoomHandler(roomService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -62,6 +65,16 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		user := data.Group("/user")
 		{
 			user.GET("/data", userHandler.GetUserByID) // Получение данных пользователя, в т.ч. ролей и прав
+			user.PUT("/data", userHandler.UpdateUser)  // Изменение данных пользователя
+			user.POST("/password", userHandler.UpdatePassword)
+		}
+		room := data.Group("/room")
+		{
+			room.POST("", roomHandler.CreateRoom)
+			room.GET("", roomHandler.GetAllRooms) // Доработать + стат
+			room.GET("/:id", roomHandler.GetRoomByID)
+			room.PUT("/:id", roomHandler.UpdateRoom)    // Доработать + стат
+			room.DELETE("/:id", roomHandler.DeleteRoom) // Доработать + проверка на наличие юзеров
 		}
 	}
 }

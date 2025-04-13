@@ -20,11 +20,27 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (u *UserRepository) GetUserByID(id uuid.UUID) (models.User, error) {
 	var user models.User
-	err := u.db.First(&user, id).Error
+	err := u.db.Preload("Role").First(&user, "id = ?", id).Error
 	if err != nil {
 		return user, err
 	}
-	// Обнуляем хэш пароля, чтобы не возвращать
 	user.PasswordHash = ""
 	return user, nil
+}
+func (u *UserRepository) GetPasswordHash(id uuid.UUID) (string, error) {
+	var user models.User
+	err := u.db.Select("password_hash").First(&user, "id = ?", id).Error
+	if err != nil {
+		return "", err
+	}
+	return user.PasswordHash, nil
+}
+func (u *UserRepository) UpdatePasswordHash(id uuid.UUID, hash string) error {
+	return u.db.Model(&models.User{}).
+		Where("id = ?", id).
+		Update("password_hash", hash).Error
+}
+
+func (u *UserRepository) UpdateUserFields(id uuid.UUID, fields map[string]interface{}) error {
+	return u.db.Model(&models.User{}).Where("id = ?", id).Updates(fields).Error
 }
