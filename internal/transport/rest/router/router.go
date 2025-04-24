@@ -5,6 +5,8 @@ import (
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
+	"backend/internal/transport/websocket"
+	"backend/internal/tunnel"
 	"backend/pkg/cache"
 	"backend/pkg/config"
 	"backend/pkg/db"
@@ -37,8 +39,17 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
+	redisAddr := cfg.RedisHost + ":" + cfg.RedisPort
+	redisClient := tunnel.NewRedisClient(redisAddr)
+	hub := websocket.NewHub(redisClient)
+	go hub.Run()
+
 	api := e.Group("/api/v1")
 	api.GET("/ping", handlers.Ping)
+	api.GET("/ws", func(c echo.Context) error {
+		websocket.InitWebSocket(hub, c.Response().Writer, c.Request())
+		return nil
+	})
 
 	auth := api.Group("/auth")
 	{
