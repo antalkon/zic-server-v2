@@ -1,6 +1,7 @@
 package router
 
 import (
+	glob_config "backend/config"
 	"backend/internal/repository"
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
@@ -47,9 +48,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/refresh-token", authHandler.RefreshToken)
 		auth.POST("/sign-out", authHandler.SignOutUser)
 	}
-	licenze := api.Group("/licenze")
-	{
-		licenze.POST("/activate", authHandler.ActivateLicenze)
+	if !glob_config.Licenze {
+		licenze := api.Group("/licenze")
+		{
+			licenze.POST("/activate", authHandler.ActivateLicenze)
+		}
 	}
 
 	data := api.Group("/data")

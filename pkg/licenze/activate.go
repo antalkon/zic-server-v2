@@ -61,17 +61,19 @@ func activateReq(token string) error {
 	var result struct {
 		Expiration string `json:"expiration"`
 		NewSecret  string `json:"new_secret"`
-		AccountID  string `json:"account-id"`
+		AccountID  string `json:"account_id"`
+		Token      string `json:"token"`
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return fmt.Errorf("parse response error: %w", err)
 	}
 
-	// Обновляем конфиг
 	cfg.Licenze.Expiration = result.Expiration
 	cfg.Licenze.Secret = result.NewSecret
 	cfg.Licenze.AccountID = result.AccountID
+	cfg.Licenze.Token = result.Token
+	cfg.Licenze.Status = "active"
 
 	if err := config.ServiceSaveConfig(cfg); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)

@@ -32,9 +32,7 @@ func NewApp() (*App, error) {
 
 	// Init yaml configs
 	config.ServiceInit()
-
 	hub.HubInit()
-
 	// Init db (Postgres)
 	database, err := db.NewDatabase(cfg)
 	if err != nil {
