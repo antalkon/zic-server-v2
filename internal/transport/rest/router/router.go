@@ -1,7 +1,6 @@
 package router
 
 import (
-	glob_config "backend/config"
 	"backend/internal/repository"
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
@@ -23,18 +22,21 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	userRepo := repository.NewUserRepository(ddbb)
 	roomRepo := repository.NewRoomRepository(ddbb)
 	computerRepo := repository.NewComputerRepository(ddbb)
+	fristRepo := repository.NewFristRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
 	userService := service.NewUserService(userRepo)
 	roomService := service.NewRoomService(roomRepo)
 	computerService := service.NewComputerService(computerRepo)
+	fristService := service.NewFristService(fristRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
 	userHandler := handlers.NewUserHandler(userService)
 	roomHandler := handlers.NewRoomHandler(roomService)
 	computerHandler := handlers.NewComputerHandler(computerService)
+	fristHandler := handlers.NewFristHandler(fristService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -48,11 +50,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/refresh-token", authHandler.RefreshToken)
 		auth.POST("/sign-out", authHandler.SignOutUser)
 	}
-	if !glob_config.Licenze {
-		licenze := api.Group("/licenze")
-		{
-			licenze.POST("/activate", authHandler.ActivateLicenze)
-		}
+
+	frist := api.Group("/first")
+	{
+		frist.POST("/licenze/activate", fristHandler.ActivateLicenze)
+
 	}
 
 	data := api.Group("/data")

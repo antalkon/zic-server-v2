@@ -41,6 +41,7 @@ type ServiceServerConfig struct {
 	Email         string `yaml:"email"`
 	ContactPerson string `yaml:"contact-person"`
 	ID            string `yaml:"id"`
+	Frist         bool   `yaml:"frist"`
 }
 
 type ServiceZentasAPI struct {
