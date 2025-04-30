@@ -5,8 +5,6 @@ import (
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
-	"backend/internal/transport/websocket"
-	"backend/internal/tunnel"
 	"backend/pkg/cache"
 	"backend/pkg/config"
 	"backend/pkg/db"
@@ -39,17 +37,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
-	redisAddr := cfg.RedisHost + ":" + cfg.RedisPort
-	redisClient := tunnel.NewRedisClient(redisAddr)
-	hub := websocket.NewHub(redisClient)
-	go hub.Run()
-
 	api := e.Group("/api/v1")
 	api.GET("/ping", handlers.Ping)
-	api.GET("/ws", func(c echo.Context) error {
-		websocket.InitWebSocket(hub, c.Response().Writer, c.Request())
-		return nil
-	})
 
 	auth := api.Group("/auth")
 	{
@@ -58,9 +47,13 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/refresh-token", authHandler.RefreshToken)
 		auth.POST("/sign-out", authHandler.SignOutUser)
 	}
+	licenze := api.Group("/licenze")
+	{
+		licenze.POST("/activate", authHandler.ActivateLicenze)
+	}
 
 	data := api.Group("/data")
-	data.Use(authMiddleware.AuthRequired())
+	data.Use(authMiddleware.AuthRequired(), middleware.LicenseRequired())
 	{
 		team := data.Group("/team")
 		{
@@ -100,4 +93,5 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			computer.DELETE("/:id", computerHandler.DeleteComputer)        // Доработать + проверка на наличие юзеров
 		}
 	}
+
 }

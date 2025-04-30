@@ -1,6 +1,7 @@
 package app
 
 import (
+	"backend/internal/hub"
 	"backend/internal/transport/rest/router"
 	"backend/pkg/cache"
 	"backend/pkg/config"
@@ -28,6 +29,11 @@ func NewApp() (*App, error) {
 	// Init logger
 	l := logger.NewLogger(cfg.ServerEnv)
 	l.Info("ZAP Logger initialized")
+
+	// Init yaml configs
+	config.ServiceInit()
+
+	hub.HubInit()
 
 	// Init db (Postgres)
 	database, err := db.NewDatabase(cfg)

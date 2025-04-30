@@ -12,6 +12,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repository"
 	"backend/pkg/hash"
+	"backend/pkg/licenze"
 	tokenjwt "backend/pkg/token_jwt"
 )
 
@@ -187,4 +188,12 @@ func GenerateSecret(length int) string {
 		secret[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(secret)
+}
+
+func (s *AuthService) ActivateLicenze(token string) error {
+	_, err := licenze.ActivateLicenze(token)
+	if err != nil {
+		return fmt.Errorf("failed to activate license: %w", err)
+	}
+	return nil
 }
