@@ -3,19 +3,19 @@ licenze:
     type: free
     expiration: "2025-05-03"
     accound-id: "73197375"
-    last-check: "2025-04-30"
-    secret: hgzauxdtuc
+    last-check: "2025-05-01"
+    secret: embbsjxszk
     status: active
 server:
-    name: Дуплекс
-    type: school
-    url: https://example.com
-    address: г. Москва, ул. Ленина, д. 1
-    phone: +7 (495) 123-45-67
+    name: МАОУ Дуплекс
+    type: Школа
+    url: https://example.org/
+    address: Толчачева, 18
+    phone: "+79523235502"
     email: antalkon789@gmail.com
-    contact-person: Иванов Иван Иванович
+    contact-person: Антипьев Алексей Константинович
     id: abbbcdefghijklmnopqrstuvwxyz
     frist: true
 zentas-api:
-    token: abcdefghijklmnopqrstuvwxyz
-    id: "123456789"
+    token: ZwtJxxW33hp8RD7GtI
+    id: 7EhjWaZRbPfB

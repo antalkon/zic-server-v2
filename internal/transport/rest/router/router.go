@@ -54,6 +54,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	frist := api.Group("/first")
 	{
 		frist.POST("/licenze/activate", fristHandler.ActivateLicenze)
+		frist.POST("/form/org", fristHandler.OrgFormation)
+		frist.POST("/form/api", fristHandler.ApiFormation)
 
 	}
 

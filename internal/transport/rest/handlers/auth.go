@@ -161,27 +161,3 @@ func setAuthCookies(c echo.Context, tokens models.AuthTokens) {
 		MaxAge:   60 * 60 * 24 * 30, // 30 дней
 	})
 }
-
-func (h *AuthHandler) ActivateLicenze(c echo.Context) error {
-	// Получаем токен из тела запроса
-	var req req.ActivateLicenzeReq
-	if err := c.Bind(&req); err != nil {
-		code, msg := utils.BadRequestError()
-		return c.JSON(code, msg)
-	}
-
-	if err := h.validate.Struct(req); err != nil {
-		code, msg := utils.ValidationError()
-		return c.JSON(code, msg)
-	}
-
-	// Проверяем лицензию
-	if err := h.auth.ActivateLicenze(req.Token); err != nil {
-		code, msg := utils.InternalServerError("failed to activate license: " + err.Error())
-		return c.JSON(code, msg)
-	}
-
-	return c.JSON(http.StatusOK, res.MessageRes{
-		Message: "License activated successfully",
-	})
-}

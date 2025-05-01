@@ -48,7 +48,7 @@ func CheckLicenze() bool {
 }
 func checkReq() error {
 	cfg := config.ServiceGet()
-	url := glob_config.ZicApiUrl + "/check"
+	url := glob_config.ZicApiUrlLicense + "/check"
 
 	payload := map[string]string{
 		"token":  cfg.Licenze.Token,

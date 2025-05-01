@@ -25,7 +25,7 @@ func ActivateLicenze(token string) (bool, error) {
 func activateReq(token string) error {
 	cfg := config.ServiceGet()
 	id := cfg.Server.ID
-	url := glob_config.ZicApiUrl + "/activate"
+	url := glob_config.ZicApiUrlLicense + "/activate"
 
 	payload := map[string]string{
 		"token":      token,
