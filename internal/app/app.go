@@ -32,6 +32,7 @@ func NewApp() (*App, error) {
 
 	// Init yaml configs
 	config.ServiceInit()
+	config.TelegramInit()
 	hub.HubInit()
 	// Init db (Postgres)
 	database, err := db.NewDatabase(cfg)

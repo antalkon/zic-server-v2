@@ -56,6 +56,7 @@ func (s *FristService) ApiFormation(req *req.FristStartAPI) error {
 	cfg := config.ServiceGet()
 	cfg.ZentasAPI.ID = id
 	cfg.ZentasAPI.Token = token
+	cfg.Server.Frist = false
 	if err := config.ServiceSaveConfig(cfg); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
 	}

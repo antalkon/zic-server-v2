@@ -1,0 +1,23 @@
+bot-settings:
+    token: 123456789:ABCdefGHIjklMNOpQRstUVwxyz
+    timezone: Europe/Moscow
+bot-seccurity:
+    admin-ids:
+        - 3171
+        - 29234
+    teacher-ids: []
+bot-messages:
+    start: |
+        Привет, {first_name}!
+        Я бот для автоматизации работы с Zentas.
+        Чтобы начать, напишите /help.
+    help: |
+        Я могу помочь вам с различными задачами, связанными с Zentas.
+        Вот некоторые команды, которые вы можете использовать:
+        - /start - Начать работу со мной
+        - /help - Получить помощь
+        - /settings - Настройки бота
+    settings: |
+        Настройки бота:
+        - Чат ID: {chat_id}
+        - Имя: {first_name}

@@ -18,8 +18,3 @@ type FristStartAPI struct {
 	Token string `json:"token" validate:"required"`
 	Id    string `json:"id" validate:"required"`
 }
-
-// Step 3: Change admin password\
-type CgangeAdminPassword struct {
-	NewPassword string `json:"new_password" validate:"required"`
-}

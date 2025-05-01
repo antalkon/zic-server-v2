@@ -23,6 +23,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	roomRepo := repository.NewRoomRepository(ddbb)
 	computerRepo := repository.NewComputerRepository(ddbb)
 	fristRepo := repository.NewFristRepository(ddbb)
+	settingsRepo := repository.NewSettingsRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
@@ -30,6 +31,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	roomService := service.NewRoomService(roomRepo)
 	computerService := service.NewComputerService(computerRepo)
 	fristService := service.NewFristService(fristRepo)
+	settingsService := service.NewSettingsService(settingsRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
@@ -37,6 +39,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	roomHandler := handlers.NewRoomHandler(roomService)
 	computerHandler := handlers.NewComputerHandler(computerService)
 	fristHandler := handlers.NewFristHandler(fristService)
+	settingsHandler := handlers.NewSettingsHandler(settingsService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -51,12 +54,14 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		auth.POST("/sign-out", authHandler.SignOutUser)
 	}
 
-	frist := api.Group("/first")
-	{
-		frist.POST("/licenze/activate", fristHandler.ActivateLicenze)
-		frist.POST("/form/org", fristHandler.OrgFormation)
-		frist.POST("/form/api", fristHandler.ApiFormation)
+	if config.ServiceGet().Server.Frist {
+		frist := api.Group("/first")
+		{
+			frist.POST("/licenze/activate", fristHandler.ActivateLicenze)
+			frist.POST("/form/org", fristHandler.OrgFormation)
+			frist.POST("/form/api", fristHandler.ApiFormation)
 
+		}
 	}
 
 	data := api.Group("/data")
@@ -98,6 +103,13 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			computer.PUT("/:id", computerHandler.UpdateComputer)           // Доработать + стат
 			computer.GET("/room/:id", computerHandler.GetRoomComputersAll) // Доработать + стат
 			computer.DELETE("/:id", computerHandler.DeleteComputer)        // Доработать + проверка на наличие юзеров
+		}
+		settings := data.Group("/settings")
+		{
+			settings.GET("/general", settingsHandler.GetGeneralSettings) // Получение общих настроек
+			settings.PUT("/general", settingsHandler.UpdateGeneralSettings)
+			settings.GET("/telegram", settingsHandler.GetTelegramSettings) // Получение настроек телеги
+			settings.PUT("/telegram", settingsHandler.UpdateTelegramSettings)
 		}
 	}
 

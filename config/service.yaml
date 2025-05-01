@@ -7,15 +7,17 @@ licenze:
     secret: embbsjxszk
     status: active
 server:
-    name: МАОУ Дуплекс
+    name: Duplex
     type: Школа
     url: https://example.org/
     address: Толчачева, 18
     phone: "+79523235502"
     email: antalkon789@gmail.com
-    contact-person: Антипьев Алексей Константинович
+    contact-person: Иванов Иван Ивонович
     id: abbbcdefghijklmnopqrstuvwxyz
     frist: true
+    timezone: Europe/Moscow
+    language: en
 zentas-api:
     token: ZwtJxxW33hp8RD7GtI
     id: 7EhjWaZRbPfB
