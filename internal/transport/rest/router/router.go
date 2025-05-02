@@ -5,7 +5,6 @@ import (
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
-	"backend/internal/transport/ws"
 	"backend/pkg/cache"
 	"backend/pkg/config"
 	"backend/pkg/db"
@@ -25,6 +24,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	computerRepo := repository.NewComputerRepository(ddbb)
 	fristRepo := repository.NewFristRepository(ddbb)
 	settingsRepo := repository.NewSettingsRepository(ddbb)
+	tunelRpo := repository.NewTunelRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
@@ -33,6 +33,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	computerService := service.NewComputerService(computerRepo)
 	fristService := service.NewFristService(fristRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
+	tunelService := service.NewTunelService(tunelRpo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
@@ -41,6 +42,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	computerHandler := handlers.NewComputerHandler(computerService)
 	fristHandler := handlers.NewFristHandler(fristService)
 	settingsHandler := handlers.NewSettingsHandler(settingsService)
+	tunelHandler := handlers.NewTunelHandler(tunelService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -66,7 +68,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	}
 	websocket := api.Group("/ws")
 	{
-		websocket.GET("/tunnel/:uuid", ws.HandleTunnel(cache)) // ✅ вот так правильно
+		websocket.GET("/tunnel/:uuid", tunelHandler.HandleTunnel(cache)) // ✅ вот так правильно
 	}
 
 	data := api.Group("/data")
