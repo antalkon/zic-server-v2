@@ -66,10 +66,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	}
 	websocket := api.Group("/ws")
 	{
-		websocket.GET("/tunnel/:uuid", func(c echo.Context) error {
-			uuid := c.Param("uuid")
-			return ws.HandleTunnel(c.Response(), c.Request(), uuid)
-		})
+		websocket.GET("/tunnel/:uuid", ws.HandleTunnel(cache)) // ✅ вот так правильно
 	}
 
 	data := api.Group("/data")

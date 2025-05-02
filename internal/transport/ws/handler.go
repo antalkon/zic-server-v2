@@ -1,38 +1,29 @@
 package ws
 
 import (
+	"backend/pkg/cache"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // потом можно ограничить
-	},
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// Основной хендлер WebSocket
-func HandleTunnel(w http.ResponseWriter, r *http.Request, tunnelID string) error {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("❌ WebSocket upgrade failed:", err)
-		return err
+func HandleTunnel(redis *cache.RedisClient) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		tunnelID := c.Param("uuid")
+
+		conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+		if err != nil {
+			log.Println("Upgrade error:", err)
+			return err
+		}
+
+		InitTunnel(conn, tunnelID, redis)
+		return nil
 	}
-
-	client := &Connection{
-		Conn: conn,
-		Send: make(chan []byte, 256),
-	}
-
-	tunnel := &Tunnel{
-		ID:         tunnelID,
-		Connection: client,
-	}
-
-	go tunnel.HandleMessages()
-
-	log.Printf("✅ Установлено WS соединение для туннеля: %s\n", tunnelID)
-	return nil
 }

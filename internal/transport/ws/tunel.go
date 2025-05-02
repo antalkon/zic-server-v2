@@ -1,23 +1,20 @@
 package ws
 
 import (
-	"log"
+	"backend/pkg/cache"
+	"context"
+	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Tunnel struct {
 	ID         string
-	Connection *Connection
+	ComputerID string
+	Conn       *websocket.Conn
+	LastPong   time.Time
+	Cancel     context.CancelFunc
+	Redis      *cache.RedisClient
 }
 
-// Обработка сообщений в туннеле
-func (t *Tunnel) HandleMessages() {
-	for {
-		_, msg, err := t.Connection.Conn.ReadMessage()
-		if err != nil {
-			log.Printf("❌ Ошибка чтения из туннеля [%s]: %v", t.ID, err)
-			break
-		}
-		log.Printf("📨 [%s] Получено: %s", t.ID, string(msg))
-		// TODO: обрабатывать сообщение по протоколу
-	}
-}
+var ActiveTunnels = make(map[string]*Tunnel)
