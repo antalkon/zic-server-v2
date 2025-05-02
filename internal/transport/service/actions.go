@@ -2,7 +2,7 @@ package service
 
 import (
 	"backend/internal/repository"
-	"backend/internal/transport/ws"
+	zicprotws "backend/internal/transport/zicprot_ws"
 	"backend/pkg/cache"
 	"encoding/json"
 	"fmt"
@@ -36,7 +36,7 @@ func (s *ActionsService) SendReboot(computerID string, delay int) error {
 	}
 
 	// 💡 Тут передаём tunnelID вместо computerID!
-	err = ws.SendCommandDirect(tunnelID, "REBOOT", map[string]interface{}{
+	err = zicprotws.SendCommandDirect(tunnelID, "REBOOT", map[string]interface{}{
 		"force":   false,
 		"timeout": delay,
 		"message": fmt.Sprintf("Перезагрузка через %d секунд", delay),

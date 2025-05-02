@@ -1,4 +1,4 @@
-package ws
+package zicprotws
 
 import (
 	"backend/internal/tunel_service"

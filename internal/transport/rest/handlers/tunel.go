@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/internal/transport/ws"
+	zicprotws "backend/internal/transport/zicprot_ws"
 	"backend/internal/tunel_service"
 	"backend/pkg/cache"
 	"log"
@@ -38,7 +38,7 @@ func (h *TunelHandler) HandleTunnel(redis *cache.RedisClient) echo.HandlerFunc {
 			return err
 		}
 
-		ws.InitTunnel(conn, tunnelID, redis, h.tunel) // 👈 передаём сервис
+		zicprotws.InitTunnel(conn, tunnelID, redis, h.tunel) // 👈 передаём сервис
 		return nil
 	}
 }
