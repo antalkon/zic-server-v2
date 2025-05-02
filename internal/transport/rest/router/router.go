@@ -110,6 +110,10 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			settings.PUT("/general", settingsHandler.UpdateGeneralSettings)
 			settings.GET("/telegram", settingsHandler.GetTelegramSettings) // Получение настроек телеги
 			settings.PUT("/telegram", settingsHandler.UpdateTelegramSettings)
+			settings.GET("/api", settingsHandler.GetApiSettings) // Получение настроек API
+			settings.PUT("/api", settingsHandler.UpdateApiSettings)
+			settings.GET("/license", settingsHandler.GetLicenseSettings) // Получение настроек лицензии
+			settings.PUT("/license", settingsHandler.UpdateLicenseSettings)
 		}
 	}
 

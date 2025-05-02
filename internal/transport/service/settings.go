@@ -3,7 +3,9 @@ package service
 import (
 	"backend/internal/repository"
 	"backend/internal/transport/rest/req"
+	"backend/pkg/api"
 	"backend/pkg/config"
+	"backend/pkg/licenze"
 	"fmt"
 )
 
@@ -39,6 +41,19 @@ type TelegramSettings struct {
 	MessageStart    string  `json:"message_start"`
 	MessageHelp     string  `json:"message_help"`
 	MessageSettings string  `json:"message_settings"`
+}
+
+type LicenseSettings struct {
+	Token      string `json:"token"`
+	Type       string `json:"type"`
+	Expiration string `json:"expiration"`
+	AccountID  string `json:"account_id"`
+	LastCheck  string `json:"last_check"`
+	Status     string `json:"status"`
+}
+type ApiSettigs struct {
+	Token string `json:"token"`
+	Id    string `json:"id"`
 }
 
 func (s *SettingsService) GetGeneralSettings() (*GeneralSettings, error) {
@@ -147,4 +162,57 @@ func (s *SettingsService) UpdateTelegramSettings(req *req.UpdateTelegramSettings
 	}
 
 	return config.TelegramSaveConfig(cfg)
+}
+
+func (s *SettingsService) GetApiSettings() (*ApiSettigs, error) {
+	cfg := config.ServiceGet()
+
+	settings := &ApiSettigs{
+		Token: cfg.ZentasAPI.Token,
+		Id:    cfg.ZentasAPI.ID,
+	}
+
+	return settings, nil
+}
+
+func (s *SettingsService) UpdateApiSettings(req *req.UpdateApiSettingsReq, role string) error {
+	if role != "admin" {
+		return fmt.Errorf("unauthorized")
+	}
+	if err := api.ActivateApi(req.Id, req.Token); err != nil {
+		return fmt.Errorf("activation error: %w", err)
+	}
+	cfg := config.ServiceGet()
+	cfg.ZentasAPI.Token = req.Token
+	cfg.ZentasAPI.ID = req.Id
+
+	return config.ServiceSaveConfig(cfg)
+}
+
+func (s *SettingsService) GetLicenseSettings() (*LicenseSettings, error) {
+	cfg := config.ServiceGet()
+
+	settings := &LicenseSettings{
+		Token:      cfg.Licenze.Token,
+		Type:       cfg.Licenze.Type,
+		Expiration: cfg.Licenze.Expiration,
+		AccountID:  cfg.Licenze.AccountID,
+		LastCheck:  cfg.Licenze.LastCheck,
+		Status:     cfg.Licenze.Status,
+	}
+
+	return settings, nil
+}
+
+func (s *SettingsService) UpdateLicenseSettings(req *req.UpdateLicenseSettingsReq, role string) error {
+	if role != "admin" {
+		return fmt.Errorf("unauthorized")
+	}
+
+	_, err := licenze.ActivateLicenze(req.Token)
+	if err != nil {
+		return fmt.Errorf("activation error: %w", err)
+	}
+
+	return nil
 }

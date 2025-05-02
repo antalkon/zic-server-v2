@@ -83,3 +83,64 @@ func (h *SettingsHandler) UpdateTelegramSettings(c echo.Context) error {
 		"message": "Настройки успешно обновлены",
 	})
 }
+
+func (h *SettingsHandler) GetApiSettings(c echo.Context) error {
+	settings, err := h.settings.GetApiSettings()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to get settings",
+		})
+	}
+	return c.JSON(http.StatusOK, settings)
+}
+
+func (h *SettingsHandler) UpdateApiSettings(c echo.Context) error {
+	var req req.UpdateApiSettingsReq
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "failed to bind request",
+		})
+	}
+
+	// Пример: роль берётся из контекста, подставь свою логику
+	userRole := c.Get("user_role").(string)
+	if err := h.settings.UpdateApiSettings(&req, userRole); err != nil {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Настройки успешно обновлены",
+	})
+}
+
+func (h *SettingsHandler) GetLicenseSettings(c echo.Context) error {
+	settings, err := h.settings.GetLicenseSettings()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to get settings",
+		})
+	}
+	return c.JSON(http.StatusOK, settings)
+}
+func (h *SettingsHandler) UpdateLicenseSettings(c echo.Context) error {
+	var req req.UpdateLicenseSettingsReq
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "failed to bind request",
+		})
+	}
+
+	// Пример: роль берётся из контекста, подставь свою логику
+	userRole := c.Get("user_role").(string)
+	if err := h.settings.UpdateLicenseSettings(&req, userRole); err != nil {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Настройки успешно обновлены. Пожалуйте, перезапустите сервер.",
+	})
+}

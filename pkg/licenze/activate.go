@@ -11,9 +11,6 @@ import (
 )
 
 func ActivateLicenze(token string) (bool, error) {
-	if glob_config.Licenze {
-		return false, fmt.Errorf("лицензия активна")
-	}
 	if err := activateReq(token); err != nil {
 		return false, err
 	}

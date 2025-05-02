@@ -21,3 +21,12 @@ type UpdateTelegramSettingsReq struct {
 	MessageHelp     *string  `json:"message_help"`
 	MessageSettings *string  `json:"message_settings"`
 }
+
+type UpdateApiSettingsReq struct {
+	Token string `json:"token" validate:"required"`
+	Id    string `json:"id" validate:"required"`
+}
+
+type UpdateLicenseSettingsReq struct {
+	Token string `json:"token"`
+}
