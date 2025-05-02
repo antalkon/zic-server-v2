@@ -20,6 +20,7 @@ type App struct {
 	DB     *db.Database
 	Cache  *cache.RedisClient
 	S3     *storage.MinIOClient
+	Echo   *echo.Echo // 💡 добавляем Echo, чтобы передавать его в ws.Start
 }
 
 func NewApp() (*App, error) {
@@ -30,10 +31,11 @@ func NewApp() (*App, error) {
 	l := logger.NewLogger(cfg.ServerEnv)
 	l.Info("ZAP Logger initialized")
 
-	// Init yaml configs
+	// Init YAML configs
 	config.ServiceInit()
 	config.TelegramInit()
 	hub.HubInit()
+
 	// Init db (Postgres)
 	database, err := db.NewDatabase(cfg)
 	if err != nil {
@@ -58,29 +60,32 @@ func NewApp() (*App, error) {
 	}
 	l.Info("MinIO initialized")
 
+	// Echo app
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.Recover())
+	e.Use(l.WithEchoMiddleware())
+
+	// HTTP routes
+	router.SetupRouter(e, cfg, l, database, redisClient, s3Client)
+
 	return &App{
 		Config: cfg,
 		Logger: l,
 		DB:     database,
 		Cache:  redisClient,
 		S3:     s3Client,
+		Echo:   e, // важно сохранить Echo экземпляр
 	}, nil
 }
 
-// Run app
+// Run app (просто лог)
 func (a *App) Run() {
 	a.Logger.Info("Application is running...")
 }
 
+// RunServer запускает HTTP + WS сервер
 func (a *App) RunServer() error {
-	e := echo.New()
-
-	// Middleware
-	e.Use(middleware.Recover())
-	e.Use(a.Logger.WithEchoMiddleware())
-
-	// Routes
-	router.SetupRouter(e, a.Config, a.Logger, a.DB, a.Cache, a.S3)
-
-	return e.Start(":" + a.Config.ServerAddress)
+	return a.Echo.Start(":" + a.Config.ServerAddress)
 }

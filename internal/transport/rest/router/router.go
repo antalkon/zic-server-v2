@@ -5,6 +5,7 @@ import (
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
+	"backend/internal/transport/ws"
 	"backend/pkg/cache"
 	"backend/pkg/config"
 	"backend/pkg/db"
@@ -62,6 +63,13 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			frist.POST("/form/api", fristHandler.ApiFormation)
 
 		}
+	}
+	websocket := api.Group("/ws")
+	{
+		websocket.GET("/tunnel/:uuid", func(c echo.Context) error {
+			uuid := c.Param("uuid")
+			return ws.HandleTunnel(c.Response(), c.Request(), uuid)
+		})
 	}
 
 	data := api.Group("/data")
