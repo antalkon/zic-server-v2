@@ -44,7 +44,7 @@ func (s *ComputerService) CreateComputer(computer *models.Computer, userRole str
 	computer.Secret = generateSecret(12)
 
 	// Генерация токена
-	jwt, err := tokenjwt.GeneratePcJWT(computer.ID, computer.Secret)
+	jwt, err := tokenjwt.GenerateTunnelToken(computer.ID.String())
 	if err != nil {
 		return "", fmt.Errorf("failed to generate JWT: %w", err)
 	}

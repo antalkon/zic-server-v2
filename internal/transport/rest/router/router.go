@@ -33,7 +33,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	computerService := service.NewComputerService(computerRepo)
 	fristService := service.NewFristService(fristRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
-	tunelService := service.NewTunelService(tunelRpo)
+	tunelService := service.NewTunelService(tunelRpo, cache)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)

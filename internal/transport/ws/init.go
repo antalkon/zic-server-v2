@@ -2,6 +2,7 @@ package ws
 
 import (
 	"backend/internal/transport/service"
+	wsmodels "backend/internal/ws_models"
 	"backend/pkg/cache"
 	"context"
 	"encoding/json"
@@ -29,33 +30,47 @@ func InitTunnel(conn *websocket.Conn, tunnelID string, redis *cache.RedisClient,
 }
 
 func (t *Tunnel) handleInit(m Message) {
-	payload, ok := m.Payload.(map[string]interface{})
-	if !ok {
-		log.Println("❌ Неверный формат payload")
+	var payload wsmodels.InitPayload
+	raw, err := json.Marshal(m.Payload)
+	if err != nil {
+		log.Println("❌ Failed to marshal payload:", err)
+		t.sendErrorAndClose(m.ID, "Ошибка сериализации payload")
+		return
+	}
+	if err := json.Unmarshal(raw, &payload); err != nil {
+		log.Println("❌ Invalid payload format:", err)
+		t.sendErrorAndClose(m.ID, "Неверный формат payload")
 		return
 	}
 
-	t.ComputerID = payload["computer_id"].(string)
+	t.ComputerID = payload.ComputerID
+	if err := t.Service.GetTunnelByID(&payload); err != nil {
+		log.Printf("❌ Failed to get tunnel by ID: %v\n", err)
+		t.sendErrorAndClose(m.ID, "Ошибка инициализации туннеля: "+err.Error())
+		return
+	}
 
 	info := map[string]interface{}{
 		"tunnel_id": t.ID,
 		"status":    "online",
 		"last_seen": time.Now().Format(time.RFC3339),
-		"os":        payload["os"],
-		"ip":        payload["local_ip"],
+		"os":        payload.OS,
+		"ip":        payload.LocalIP,
 	}
 
 	jsonValue, err := json.Marshal(info)
 	if err != nil {
 		log.Println("❌ Redis marshal error:", err)
+		t.sendErrorAndClose(m.ID, "Ошибка сохранения данных в Redis")
 		return
 	}
 
 	if err := t.Redis.Set("pc:"+t.ComputerID, jsonValue, 2*time.Minute); err != nil {
 		log.Println("❌ Redis set error:", err)
+		t.sendErrorAndClose(m.ID, "Ошибка записи в Redis")
+		return
 	}
 
-	// Ответ клиенту
 	resp := Message{
 		Version:   "1.0",
 		Type:      "response",
@@ -74,4 +89,20 @@ func (t *Tunnel) handleInit(m Message) {
 		},
 	}
 	t.Conn.WriteJSON(resp)
+}
+
+func (t *Tunnel) sendErrorAndClose(id, errMsg string) {
+	errorMsg := Message{
+		Version:   "1.0",
+		Type:      "error",
+		ID:        id,
+		From:      "server",
+		Timestamp: time.Now(),
+		Payload: map[string]interface{}{
+			"status":  "error",
+			"message": errMsg,
+		},
+	}
+	_ = t.Conn.WriteJSON(errorMsg)
+	t.Conn.Close()
 }
