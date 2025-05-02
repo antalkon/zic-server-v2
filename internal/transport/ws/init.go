@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"backend/internal/transport/service"
+	"backend/internal/tunel_service"
 	wsmodels "backend/internal/ws_models"
 	"backend/pkg/cache"
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func InitTunnel(conn *websocket.Conn, tunnelID string, redis *cache.RedisClient, service *service.TunelService) {
+func InitTunnel(conn *websocket.Conn, tunnelID string, redis *cache.RedisClient, service *tunel_service.TunelService) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	t := &Tunnel{

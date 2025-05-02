@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"backend/internal/transport/service"
+	"backend/internal/tunel_service"
 	"backend/pkg/cache"
 	"context"
 	"time"
@@ -16,7 +16,7 @@ type Tunnel struct {
 	LastPong   time.Time
 	Cancel     context.CancelFunc
 	Redis      *cache.RedisClient
-	Service    *service.TunelService // 👈 добавляем
+	Service    *tunel_service.TunelService // 👈 добавляем
 }
 
 var ActiveTunnels = make(map[string]*Tunnel)

@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"backend/internal/transport/service"
 	"backend/internal/transport/ws"
+	"backend/internal/tunel_service"
 	"backend/pkg/cache"
 	"log"
 	"net/http"
@@ -13,11 +13,11 @@ import (
 )
 
 type TunelHandler struct {
-	tunel    *service.TunelService
+	tunel    *tunel_service.TunelService
 	validate *validator.Validate
 }
 
-func NewTunelHandler(tunel *service.TunelService) *TunelHandler {
+func NewTunelHandler(tunel *tunel_service.TunelService) *TunelHandler {
 	return &TunelHandler{
 		tunel:    tunel,
 		validate: validator.New(),

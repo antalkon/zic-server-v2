@@ -5,6 +5,7 @@ import (
 	"backend/internal/transport/middleware"
 	"backend/internal/transport/rest/handlers"
 	"backend/internal/transport/service"
+	"backend/internal/tunel_service"
 	"backend/pkg/cache"
 	"backend/pkg/config"
 	"backend/pkg/db"
@@ -25,6 +26,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	fristRepo := repository.NewFristRepository(ddbb)
 	settingsRepo := repository.NewSettingsRepository(ddbb)
 	tunelRpo := repository.NewTunelRepository(ddbb)
+	actionsRepo := repository.NewActionsRepository(ddbb)
 
 	authService := service.NewAuthService(authRepo)
 	teamService := service.NewTeamService(teamRepo)
@@ -33,7 +35,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	computerService := service.NewComputerService(computerRepo)
 	fristService := service.NewFristService(fristRepo)
 	settingsService := service.NewSettingsService(settingsRepo)
-	tunelService := service.NewTunelService(tunelRpo, cache)
+	tunelService := tunel_service.NewTunelService(tunelRpo, cache) // костыль
+	actionsService := service.NewActionsService(actionsRepo, cache)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	teamHandler := handlers.NewTeamHandler(teamService)
@@ -43,6 +46,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	fristHandler := handlers.NewFristHandler(fristService)
 	settingsHandler := handlers.NewSettingsHandler(settingsService)
 	tunelHandler := handlers.NewTunelHandler(tunelService)
+	actionsHandler := handlers.NewActionsHandler(actionsService)
 
 	authMiddleware := middleware.NewAuthMiddleware(authRepo)
 
@@ -122,6 +126,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			settings.GET("/license", settingsHandler.GetLicenseSettings) // Получение настроек лицензии
 			settings.PUT("/license", settingsHandler.UpdateLicenseSettings)
 		}
+	}
+	actions := api.Group("/actions")
+	actions.Use(authMiddleware.AuthRequired(), middleware.LicenseRequired())
+	{
+		actions.POST("/reboot", actionsHandler.SendReboot)
 	}
 
 }
