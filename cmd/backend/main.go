@@ -28,6 +28,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Application initialization failed: %v", err)
 	}
-	application.Run()
-	application.RunServer()
+
+	// только это, Run() можешь убрать
+	if err := application.RunServer(); err != nil {
+		log.Fatalf("❌ Failed to run server: %v", err)
+	}
 }

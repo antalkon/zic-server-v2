@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const serviceConfigPath = "config/service.yaml"
+const serviceConfigPath = "config/yaml/service.yaml"
 
 var (
 	serviceCfg  *ServiceConfig

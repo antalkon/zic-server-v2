@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const telegramConfigPath = "config/telegram.yaml"
+const telegramConfigPath = "config/yaml/telegram.yaml"
 
 var (
 	telegramCfg  *TelegramConfig
