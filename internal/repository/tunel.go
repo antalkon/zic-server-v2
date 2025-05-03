@@ -73,3 +73,11 @@ func (r *TunelRepository) ChangeStatus(id uuid.UUID, online bool) error {
 	}
 	return nil
 }
+
+func (r *TunelRepository) GetPcByID(id string) (*models.Computer, error) {
+	var pc models.Computer
+	if err := r.db.First(&pc, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &pc, nil
+}

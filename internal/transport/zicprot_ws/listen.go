@@ -58,8 +58,52 @@ func (t *Tunnel) listen(ctx context.Context) {
 				jsonValue, _ := json.Marshal(info)
 				t.Redis.Set("pc:"+t.ComputerID, jsonValue, 2*time.Minute)
 			}
+		case "status":
+			if t.ComputerID == "" {
+				t.sendError(m.ID, "Компьютер не инициализирован")
+				continue
+			}
+
+			pc, err := t.Service.GetPcByID(t.ComputerID)
+			if err != nil {
+				t.sendError(m.ID, "Не удалось получить статус ПК: "+err.Error())
+				continue
+			}
+
+			resp := Message{
+				Version:   "1.0",
+				Type:      "status",
+				ID:        m.ID,
+				From:      "server",
+				Timestamp: time.Now(),
+				Payload: map[string]interface{}{
+					"blocked": pc.Blocked,
+					"status":  pc.Status,
+					"comment": pc.Comment,
+					"os":      pc.OS,
+				},
+			}
+
+			if err := t.Conn.WriteJSON(resp); err != nil {
+				log.Println("❌ Ошибка отправки status-ответа:", err)
+			}
 		default:
 			log.Println("Unsupported type:", m.Type)
 		}
 	}
+}
+
+func (t *Tunnel) sendError(id, message string) {
+	errMsg := Message{
+		Version:   "1.0",
+		Type:      "error",
+		ID:        id,
+		From:      "server",
+		Timestamp: time.Now(),
+		Payload: map[string]interface{}{
+			"status":  "error",
+			"message": message,
+		},
+	}
+	_ = t.Conn.WriteJSON(errMsg)
 }

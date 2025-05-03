@@ -1,6 +1,7 @@
 package tunel_service
 
 import (
+	"backend/internal/models"
 	"backend/internal/repository"
 	wsmodels "backend/internal/ws_models"
 	"backend/pkg/cache"
@@ -99,4 +100,12 @@ func (s *TunelService) Disconnect(ws *wsmodels.InitPayload) error {
 		return fmt.Errorf("failed to update last activity: %w", err)
 	}
 	return nil
+}
+
+func (s *TunelService) GetPcByID(id string) (*models.Computer, error) {
+	pc, err := s.tunel.GetPcByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get computer by ID: %w", err)
+	}
+	return pc, nil
 }
