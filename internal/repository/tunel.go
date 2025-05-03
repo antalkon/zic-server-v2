@@ -2,6 +2,7 @@ package repository
 
 import (
 	"backend/internal/models"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -52,6 +53,22 @@ func (r *TunelRepository) UpdateLocalIP(id uuid.UUID, ip string) error {
 }
 func (r *TunelRepository) UpdateLastActivity(id uuid.UUID) error {
 	if err := r.db.Model(&models.Computer{}).Where("id = ?", id).Update("last_activity", gorm.Expr("NOW()")).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TunelRepository) ChangeStatus(id uuid.UUID, online bool) error {
+	status := "off"
+	if online {
+		status = "on"
+	}
+	if err := r.db.Model(&models.Computer{}).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"status":     status,
+			"updated_at": time.Now(),
+		}).Error; err != nil {
 		return err
 	}
 	return nil

@@ -1,6 +1,7 @@
 package zicprotws
 
 import (
+	wsmodels "backend/internal/ws_models"
 	"context"
 	"encoding/json"
 	"log"
@@ -13,6 +14,19 @@ func (t *Tunnel) listen(ctx context.Context) {
 		delete(ActiveTunnels, t.ID)
 		t.Cancel()
 		t.Redis.Del("pc:" + t.ComputerID)
+
+		// ⚠️ Вызываем Disconnect, если ComputerID указан
+		if t.ComputerID != "" && t.Service != nil {
+			err := t.Service.Disconnect(&wsmodels.InitPayload{
+				ComputerID: t.ComputerID,
+			})
+			if err != nil {
+				log.Printf("❌ Ошибка при отключении компьютера (%s): %v", t.ComputerID, err)
+			} else {
+				log.Printf("📴 Компьютер %s успешно отключён через Disconnect", t.ComputerID)
+			}
+		}
+
 		log.Println("🛑 Соединение закрыто:", t.ID)
 	}()
 

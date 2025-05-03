@@ -71,6 +71,32 @@ func (s *TunelService) GetTunnelByID(ws *wsmodels.InitPayload) error {
 	if err := s.tunel.UpdateLastActivity(pc.ID); err != nil {
 		return fmt.Errorf("failed to update last activity: %w", err)
 	}
+	if err := s.tunel.ChangeStatus(pc.ID, true); err != nil {
+		return fmt.Errorf("failed to change status: %w", err)
+	}
+	return nil
+}
 
+func (s *TunelService) Disconnect(ws *wsmodels.InitPayload) error {
+	id, err := uuid.Parse(ws.ComputerID)
+	if err != nil {
+		return fmt.Errorf("invalid computer ID format: %w", err)
+	}
+
+	pc, err := s.tunel.GetPcById(id)
+	if err != nil {
+		return fmt.Errorf("failed to get computer: %w", err)
+	}
+
+	if pc.ID != id {
+		return fmt.Errorf("computer ID does not match")
+	}
+
+	if err := s.tunel.ChangeStatus(pc.ID, false); err != nil {
+		return fmt.Errorf("failed to change status: %w", err)
+	}
+	if err := s.tunel.UpdateLastActivity(pc.ID); err != nil {
+		return fmt.Errorf("failed to update last activity: %w", err)
+	}
 	return nil
 }
