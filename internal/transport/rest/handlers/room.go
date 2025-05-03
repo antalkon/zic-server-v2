@@ -112,3 +112,35 @@ func (h *RoomHandler) DeleteRoom(c echo.Context) error {
 
 	return c.NoContent(http.StatusNoContent)
 }
+
+func (h *RoomHandler) GetRoomComputers(c echo.Context) error {
+	roomID := c.Param("id")
+	if roomID == "" {
+		code, msg := utils.NewError(http.StatusBadRequest, "room ID is required")
+		return c.JSON(code, msg)
+	}
+
+	computers, err := h.room.GetRoomComputers(roomID)
+	if err != nil {
+		code, msg := utils.InternalServerError("failed to get computers: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, computers)
+}
+
+func (h *RoomHandler) GetRoomStatus(c echo.Context) error {
+	roomID := c.Param("id")
+	if roomID == "" {
+		code, msg := utils.NewError(http.StatusBadRequest, "room ID is required")
+		return c.JSON(code, msg)
+	}
+
+	status, err := h.room.GetRoomStatusByID(roomID)
+	if err != nil {
+		code, msg := utils.InternalServerError("failed to get room status: " + err.Error())
+		return c.JSON(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, status)
+}

@@ -4,6 +4,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repository"
 	"backend/internal/transport/rest/req"
+	"backend/internal/transport/rest/res"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -86,4 +87,20 @@ func (s *RoomService) DeleteRoom(id string, userRole string) error {
 		return fmt.Errorf("failed to delete room: %w", err)
 	}
 	return nil
+}
+
+func (s *RoomService) GetRoomComputers(roomID string) ([]models.Computer, error) {
+	computers, err := s.roomRepo.GetRoomComputers(roomID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get computers for room %s: %w", roomID, err)
+	}
+	return computers, nil
+}
+
+func (s *RoomService) GetRoomStatusByID(roomID string) (*res.RoomStatusRes, error) {
+	roomStatus, err := s.roomRepo.GetRoomStatusByID(roomID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get room status for room %s: %w", roomID, err)
+	}
+	return roomStatus, nil
 }

@@ -105,6 +105,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 			room.GET("/:id", roomHandler.GetRoomByID)
 			room.PUT("/:id", roomHandler.UpdateRoom)    // Доработать + стат
 			room.DELETE("/:id", roomHandler.DeleteRoom) // Доработать + проверка на наличие юзеров
+			room.GET("/computers/:id", roomHandler.GetRoomComputers)
+			room.GET("/status/:id", roomHandler.GetRoomStatus) // Доработать + стат
 		}
 		computer := data.Group("/pc")
 		{
