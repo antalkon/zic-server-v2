@@ -46,3 +46,78 @@ func (s *ActionsService) SendReboot(computerID string, delay int) error {
 	}
 	return nil
 }
+
+func (s *ActionsService) SendShutdown(computerID string, delay int) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "SHUTDOWN", map[string]interface{}{
+		"force":   false,
+		"timeout": delay,
+		"message": fmt.Sprintf("Выключение через %d секунд", delay),
+	})
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды SHUTDOWN: %w", err)
+	}
+	return nil
+}
+
+func (s *ActionsService) SendBlock(computerID string) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "BLOCK", nil)
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды BLOCK: %w", err)
+	}
+	err = s.actions.BlockComputer(computerID)
+	if err != nil {
+		fmt.Errorf("ошибка блокировки компьютера в БД: %w", err)
+	}
+	return nil
+}
+
+func (s *ActionsService) SendUnblock(computerID string) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "UNBLOCK", nil)
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды UNBLOCK: %w", err)
+	}
+	err = s.actions.UnblockComputer(computerID)
+	if err != nil {
+		fmt.Errorf("ошибка разблокировки компьютера в БД: %w", err)
+	}
+	return nil
+}

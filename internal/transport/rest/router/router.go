@@ -130,7 +130,11 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	actions := api.Group("/actions")
 	actions.Use(authMiddleware.AuthRequired(), middleware.LicenseRequired())
 	{
-		actions.POST("/reboot", actionsHandler.SendReboot)
+		actions.POST("/reboot", actionsHandler.SendReboot)     // Перезагрузка
+		actions.POST("/shutdown", actionsHandler.SendShutdown) // Выключение
+		actions.POST("/block", actionsHandler.SendBlock)       // Блокировка
+		actions.POST("/unblock", actionsHandler.SendUnblock)   // Разблокировка
+
 	}
 
 }
