@@ -17,3 +17,18 @@ type SendBlockReq struct {
 type SendUnblockReq struct {
 	ComputerID string `json:"computer_id" validate:"required"`
 }
+
+type SendLockScreenReq struct {
+	ComputerID string `json:"computer_id" validate:"required"`
+}
+
+type SendUrlReq struct {
+	ComputerID string `json:"computer_id" validate:"required"`
+	Url        string `json:"url" validate:"required,url"`
+}
+
+type SendMessageReq struct {
+	ComputerID string `json:"computer_id" validate:"required"`
+	Message    string `json:"message" validate:"required"`
+	Type       string `json:"type" validate:"required"`
+}

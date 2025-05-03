@@ -121,3 +121,72 @@ func (s *ActionsService) SendUnblock(computerID string) error {
 	}
 	return nil
 }
+
+func (s *ActionsService) SendLockScreen(computerID string) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "LOCK", nil)
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды LOCK: %w", err)
+	}
+
+	return nil
+}
+
+func (s *ActionsService) SendUrl(computerID string, url string) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "URL", map[string]interface{}{
+		"url": url,
+	})
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды URL: %w", err)
+	}
+	return nil
+}
+
+func (s *ActionsService) SendMessage(computerID string, message string, msgType string) error {
+	key := "pc:" + computerID
+	raw, err := s.cache.Get(key)
+	if err != nil {
+		return fmt.Errorf("не удалось получить данные по ключу %s: %w", key, err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &data); err != nil {
+		return fmt.Errorf("ошибка парсинга JSON из Redis: %w", err)
+	}
+	tunnelID, ok := data["tunnel_id"].(string)
+	if !ok {
+		return fmt.Errorf("поле tunnel_id отсутствует или неправильного типа")
+	}
+	err = zicprotws.SendCommandDirect(tunnelID, "MESSAGE", map[string]interface{}{
+		"message": message,
+		"type":    msgType,
+	})
+	if err != nil {
+		return fmt.Errorf("ошибка отправки команды MESSAGE: %w", err)
+	}
+	return nil
+}

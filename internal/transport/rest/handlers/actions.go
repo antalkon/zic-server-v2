@@ -105,3 +105,63 @@ func (h *ActionsHandler) SendUnblock(c echo.Context) error {
 		Message: "unblock command sent successfully",
 	})
 }
+
+func (h *ActionsHandler) SendLockScreen(c echo.Context) error {
+	var r req.SendLockScreenReq
+	if err := c.Bind(&r); err != nil {
+		code, resp := utils.BadRequestError()
+		return c.JSON(code, resp)
+	}
+	if err := h.validate.Struct(r); err != nil {
+		code, resp := utils.ValidationError()
+		resp.Message = err.Error()
+		return c.JSON(code, resp)
+	}
+	if err := h.actions.SendLockScreen(r.ComputerID); err != nil {
+		code, resp := utils.InternalServerError("Failed to send lock screen command: " + err.Error())
+		return c.JSON(code, resp)
+	}
+	return c.JSON(200, res.MessageRes{
+		Message: "lock screen command sent successfully",
+	})
+}
+
+func (h *ActionsHandler) SendUrl(c echo.Context) error {
+	var r req.SendUrlReq
+	if err := c.Bind(&r); err != nil {
+		code, resp := utils.BadRequestError()
+		return c.JSON(code, resp)
+	}
+	if err := h.validate.Struct(r); err != nil {
+		code, resp := utils.ValidationError()
+		resp.Message = err.Error()
+		return c.JSON(code, resp)
+	}
+	if err := h.actions.SendUrl(r.ComputerID, r.Url); err != nil {
+		code, resp := utils.InternalServerError("Failed to send URL command: " + err.Error())
+		return c.JSON(code, resp)
+	}
+	return c.JSON(200, res.MessageRes{
+		Message: "URL command sent successfully",
+	})
+}
+
+func (h *ActionsHandler) SendMessage(c echo.Context) error {
+	var r req.SendMessageReq
+	if err := c.Bind(&r); err != nil {
+		code, resp := utils.BadRequestError()
+		return c.JSON(code, resp)
+	}
+	if err := h.validate.Struct(r); err != nil {
+		code, resp := utils.ValidationError()
+		resp.Message = err.Error()
+		return c.JSON(code, resp)
+	}
+	if err := h.actions.SendMessage(r.ComputerID, r.Message, r.Type); err != nil {
+		code, resp := utils.InternalServerError("Failed to send message command: " + err.Error())
+		return c.JSON(code, resp)
+	}
+	return c.JSON(200, res.MessageRes{
+		Message: "message command sent successfully",
+	})
+}
