@@ -1,10 +1,10 @@
 licenze:
-    token: NJRjwaiCkswrKUMW80
-    type: free
-    expiration: "2025-05-05"
-    accound-id: "77463970"
-    last-check: "2025-05-03"
-    secret: dezrxrjtdd
+    token: RUdP84dDyMkpFsPEiy
+    type: ""
+    expiration: "2025-06-04"
+    accound-id: "99270614"
+    last-check: "2025-06-01"
+    secret: ujtdpernfp
     status: active
 server:
     name: Duplex
@@ -19,5 +19,5 @@ server:
     timezone: Europe/Moscow
     language: en
 zentas-api:
-    token: NZA8hNgIQ02Ro8sp3P
-    id: OZ66jUWl1bxv
+    token: ""
+    id: ""
