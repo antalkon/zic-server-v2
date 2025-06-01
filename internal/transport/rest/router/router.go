@@ -16,6 +16,7 @@ import (
 )
 
 func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Database, cache *cache.RedisClient, s3 *storage.MinIOClient) {
+	e.Use(middleware.CORSMiddleware())
 	ddbb := db.DB
 
 	authRepo := repository.NewAuthRepository(ddbb)
@@ -141,5 +142,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		actions.POST("/sendmessage", actionsHandler.SendMessage)   // Отправка сообщения
 
 	}
+	// Подключаем фронтенд-маршруты
+	SetupFrontendRoutes(e)
 
 }
