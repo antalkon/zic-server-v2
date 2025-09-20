@@ -1,0 +1,156 @@
+{{ define "nav_bar" }}
+<!-- Десктопная боковая панель -->
+<aside class="hidden lg:flex w-72 bg-[#f5f8fd] border-r border-black/5 flex-col justify-between min-h-screen">
+  <!-- Верхняя часть: логотип + навигация -->
+  <div>
+    <!-- ЛОГО -->
+    <div class="flex items-center gap-3 px-6 py-6">
+      <img
+        src="{{ or .BrandLogoURL "/static/img/logo.png" }}"
+        alt="ZENTAS"
+        class="h-8 w-auto"
+        loading="eager"
+      />
+    </div>
+    
+    <!-- Навигация -->
+    <nav class="mt-4 space-y-2">
+      <!-- Активный пункт -->
+      <a href="/dashboard"
+         class="flex items-center gap-3 mx-3 px-4 py-4 bg-[#0085FF] text-white rounded-2xl font-medium shadow-sm">
+        <img src="/static/img/home.svg" alt="" class="h-5 w-5" />
+        Главная
+      </a>
+      
+      <!-- Остальные пункты -->
+      <a href="/rooms" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/rooms.svg" alt="" class="h-5 w-5" />
+        Кабинеты
+      </a>
+      
+      <a href="/classes" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/class.svg" alt="" class="h-5 w-5" />
+        Классы
+      </a>
+      
+      <a href="/cloud" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/cloud.svg" alt="" class="h-5 w-5" />
+        Облако
+      </a>
+      
+      <a href="/sandbox" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/sandbox.svg" alt="" class="h-5 w-5" />
+        Sandbox
+      </a>
+      
+      <a href="/payments" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/pay.svg" alt="" class="h-5 w-5" />
+        Платежи
+      </a>
+      
+      <a href="/settings" class="flex items-center gap-3 mx-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/settings.svg" alt="" class="h-5 w-5" />
+        Настройки
+      </a>
+    </nav>
+  </div>
+  
+  <!-- Нижняя часть -->
+  <div class="px-3 py-6">
+    <a href="/help" class="flex items-center gap-3 px-4 py-4 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+      <img src="/static/img/help.svg" alt="" class="h-5 w-5" />
+      Помощь
+    </a>
+  </div>
+</aside>
+
+<!-- Мобильное меню overlay -->
+<div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="closeMobileMenu()"></div>
+
+<!-- Мобильная боковая панель -->
+<aside id="mobile-sidebar" class="fixed left-0 top-0 h-full w-80 bg-[#f5f8fd] z-50 lg:hidden transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+  <!-- Заголовок с поиском -->
+  <div class="px-4 py-4 border-b border-black/5">
+    <!-- Поиск в мобильном меню -->
+    <div class="relative mb-4">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 0 1 5.353 10.82l4.289 4.289a.75.75 0 1 1-1.06 1.06l-4.29-4.288A6.75 6.75 0 1 1 10.5 3.75Zm0 1.5a5.25 5.25 0 1 0 0 10.5 5.25 5.25 0 0 0 0-10.5Z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+      <input
+        type="text"
+        placeholder="Поиск..."
+        class="w-full h-10 pl-10 pr-4 rounded-full bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 placeholder:opacity-60 text-sm"
+      />
+    </div>
+    
+    <!-- Профиль в мобильном меню -->
+    <div class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm">
+      <img
+        src="{{ or .User.AvatarURL "/static/img/avatar-placeholder.png" }}"
+        alt="avatar"
+        class="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow"
+      />
+      <div class="leading-tight">
+        <div class="font-semibold text-sm">
+          {{ or .User.Name "Алексей" }}
+        </div>
+        <div class="text-xs opacity-70">
+          {{ or .User.Role "Developer" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Навигация -->
+  <div class="flex-1 overflow-y-auto">
+    <nav class="p-4 space-y-2">
+      <!-- Активный пункт -->
+      <a href="/dashboard" onclick="closeMobileMenu()"
+         class="flex items-center gap-3 px-4 py-4 bg-[#0085FF] text-white rounded-2xl font-medium shadow-sm">
+        <img src="/static/img/home.svg" alt="" class="h-5 w-5" />
+        Главная
+      </a>
+      
+      <a href="/rooms" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/rooms.svg" alt="" class="h-5 w-5" />
+        Кабинеты
+      </a>
+      
+      <a href="/classes" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/class.svg" alt="" class="h-5 w-5" />
+        Классы
+      </a>
+      
+      <a href="/cloud" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/cloud.svg" alt="" class="h-5 w-5" />
+        Облако
+      </a>
+      
+      <a href="/sandbox" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/sandbox.svg" alt="" class="h-5 w-5" />
+        Sandbox
+      </a>
+      
+      <a href="/payments" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/pay.svg" alt="" class="h-5 w-5" />
+        Платежи
+      </a>
+      
+      <a href="/settings" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+        <img src="/static/img/settings.svg" alt="" class="h-5 w-5" />
+        Настройки
+      </a>
+    </nav>
+  </div>
+
+  <!-- Нижняя часть мобильного меню -->
+  <div class="p-4 border-t border-black/5">
+    <a href="/help" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-4 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+      <img src="/static/img/help.svg" alt="" class="h-5 w-5" />
+      Помощь
+    </a>
+  </div>
+</aside>
+{{ end }}

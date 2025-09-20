@@ -1,96 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZIC Вход</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 
   <style>
     .flash-alert {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 100;
-      width: 300px;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      position: fixed; bottom: 20px; right: 20px; z-index: 100;
+      width: 300px; padding: 16px; border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background-color: #f87171; color: #fff; font-weight: 500;
     }
-
     .progress-bar {
-      height: 4px;
-      background-color: #4299e1;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      animation: progress 3s linear;
+      height: 4px; background-color: #4299e1; position: absolute;
+      bottom: 0; left: 0; width: 100%; animation: progress 3s linear forwards;
     }
-
-    @keyframes progress {
-      0% { width: 100%; }
-      100% { width: 0; }
-    }
+    @keyframes progress { 0%{width:100%} 100%{width:0} }
   </style>
 </head>
 <body class="bg-blue-100 flex items-center justify-center h-screen">
-
   <div class="bg-white p-8 rounded-lg shadow-lg w-96">
     <div class="flex justify-center mb-6">
-      <img src="/static/Zentas.png" alt="Logo" class="rounded-full">
+      <img src="/static/Zentas.png" alt="Logo" class="rounded-full" />
     </div>
 
-    <form id="login-form">
+    <form id="login-form" novalidate>
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Логин</label>
-        <input type="text" id="name" name="name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-400" placeholder="Введите логин">
-      </div>
-      <div class="mb-6">
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
-        <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-400" placeholder="Введите пароль">
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Эл. адрес</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-400"
+          placeholder="Введите эл. адрес"
+          aria-invalid="false"
+        />
+        <p id="email-error" class="mt-2 text-sm text-red-600 hidden"></p>
       </div>
 
-      <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300">Войти</button>
+      <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-400"
+          placeholder="Введите пароль"
+          aria-invalid="false"
+        />
+        <p id="password-error" class="mt-2 text-sm text-red-600 hidden"></p>
+      </div>
+
+      <button
+        id="submit-btn"
+        type="submit"
+        class="w-full bg-blue-500 text-white py-3 rounded-lg transition duration-300 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled
+      >
+        Войти
+      </button>
     </form>
   </div>
 
+  <!-- Ошибка входа (показывается только при ошибке POST /sign-in) -->
+<div id="signin-error"
+     class="hidden opacity-0 transition-opacity duration-300 fixed bottom-6 right-6 z-50 w-80 rounded-lg bg-red-500 text-white shadow-lg">
+  <div class="p-4">
+    <div class="font-semibold">Ошибка входа</div>
+    <div id="signin-error-text" class="mt-1 text-sm"></div>
+  </div>
+</div>
+
   <div id="alert-container" class="fixed bottom-0 right-0 p-6 space-y-4"></div>
 
-  <script>
-    function showAlert(message, type) {
-      const alertId = `alert-${Date.now()}`;
-      const alertHtml = `
-        <div id="${alertId}" class="flash-alert bg-${type === 'success' ? 'green' : 'red'}-500 text-white relative">
-          <span>${message}</span>
-          <span class="absolute top-2 right-2 cursor-pointer" onclick="$('#${alertId}').remove()">×</span>
-          <div class="progress-bar"></div>
-        </div>`;
-      $('#alert-container').append(alertHtml);
-      setTimeout(() => $(`#${alertId}`).fadeOut(500, () => $(`#${alertId}`).remove()), 3000);
-    }
-
-    $('#login-form').on('submit', function(e) {
-      e.preventDefault();
-      const name = $('#name').val();
-      const password = $('#password').val();
-      $.ajax({
-        url: '/auth/api/login',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ name, password }),
-        success: function() {
-          showAlert('Успешный вход!', 'success');
-          location.replace('/dashboard');
-        },
-        error: function() {
-          showAlert('Ошибка: Неправильные данные для входа', 'error');
-        }
-      });
-    });
-  </script>
-
+  <!-- Подключай после jQuery и после разметки -->
+  <script src="/static/js/login.js"></script>
 </body>
 </html>
