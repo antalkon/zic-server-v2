@@ -20,7 +20,7 @@ type App struct {
 	DB     *db.Database
 	Cache  *cache.RedisClient
 	S3     *storage.MinIOClient
-	Echo   *echo.Echo // 💡 добавляем Echo, чтобы передавать его в ws.Start
+	Echo   *echo.Echo
 }
 
 func NewApp() (*App, error) {

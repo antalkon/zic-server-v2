@@ -5,7 +5,7 @@ test-run:
 	go test -v ./...
 
 upd-swg:
-	rm -rf docs
+	rm -rf api
 	swag init -g cmd/backend/main.go
 
 dc-l:

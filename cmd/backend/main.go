@@ -7,9 +7,9 @@ import (
 	_ "github.com/swaggo/echo-swagger"
 )
 
-// @title           Go Echo Template API
-// @version         1.0
-// @description     Go echo template API swagger documentation
+// @title           Zentas Informatics Class srv API
+// @version         2.0
+// @description     API документация для серверного клиента Zentas Informatics Class 2 версии (ревизия)
 
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
@@ -17,7 +17,22 @@ import (
 // @host      localhost:8080
 // @BasePath  /api/v1
 
+// ===== Cookie-based auth =====
+
+// @securityDefinitions.apikey AccessToken
+// @type apiKey
+// @in cookie
+// @name access_token
+
+// (опционально, если хочешь отдельно авторизовываться и по refresh)
+// @securityDefinitions.apikey RefreshToken
+// @type apiKey
+// @in cookie
+// @name refresh_token
+
+// (если хочешь сохранить поддержку заголовка тоже — оставь)
 // @securityDefinitions.apikey BearerAuth
+// @type apiKey
 // @in header
 // @name Authorization
 
@@ -29,7 +44,6 @@ func main() {
 		log.Fatalf("Application initialization failed: %v", err)
 	}
 
-	// только это, Run() можешь убрать
 	if err := application.RunServer(); err != nil {
 		log.Fatalf("❌ Failed to run server: %v", err)
 	}
