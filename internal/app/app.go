@@ -76,7 +76,7 @@ func NewApp() (*App, error) {
 		DB:     database,
 		Cache:  redisClient,
 		S3:     s3Client,
-		Echo:   e, // важно сохранить Echo экземпляр
+		Echo:   e,
 	}, nil
 }
 

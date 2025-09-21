@@ -1,10 +1,10 @@
 licenze:
-    token: RUdP84dDyMkpFsPEiy
-    type: ""
-    expiration: "2025-06-04"
-    accound-id: "99270614"
+    token: jmY10sUqS5YW5Hs9fG
+    type: paid
+    expiration: "2025-09-24"
+    accound-id: "16626424"
     last-check: "2025-09-21"
-    secret: lqaziaufif
+    secret: wxuylajbbu
     status: active
 server:
     name: Duplex
