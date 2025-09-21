@@ -68,9 +68,9 @@
   <div class="max-w-[1400px] mx-auto">
     
     <!-- Приветствие -->
-    <h1 class="text-[28px] sm:text-[34px] md:text-[38px] font-extrabold leading-tight text-black mb-6">
-      Здравствуйте, <span class="text-[#0085FF]">{{ or .User.Name "Алексей" }}</span>
-    </h1>
+   <h1 class="text-[28px] sm:text-[34px] md:text-[38px] font-extrabold leading-tight text-black mb-6">
+  Здравствуйте, <span id="greetName" class="text-[#0085FF]">{{ or .User.Name "Name" }}</span>
+</h1>
 
     <!-- ===== РЯД 1 ===== -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
@@ -272,6 +272,33 @@
 </main>
     </div>
   </div>
+  <script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const nameEl = document.getElementById("greetName");
+  if (!nameEl) return;
+
+  const applyName = (u) => {
+    nameEl.textContent = (u && u.name) ? u.name : "No Data";
+  };
+
+  // 1) если хедер уже загрузил пользователя — берём из кэша
+  if (window.__USER_DATA) {
+    applyName(window.__USER_DATA);
+    return;
+  }
+
+  // 2) иначе — тихо подтягиваем данные
+  try {
+    const res = await fetch("/api/v1/data/user/data", { credentials: "include" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const user = await res.json();
+    applyName(user);
+  } catch (e) {
+    console.warn("Failed to load user for greeting:", e);
+    applyName(null); // No Data
+  }
+});
+</script>
 </body>
 </html>
 {{ end }}

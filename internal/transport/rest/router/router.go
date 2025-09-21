@@ -49,7 +49,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	tunelHandler := handlers.NewTunelHandler(tunelService)
 	actionsHandler := handlers.NewActionsHandler(actionsService)
 
-	authMiddleware := middleware.NewAuthMiddleware(authRepo)
+	AuthMiddleware := middleware.NewAuthMiddleware(authRepo)
 
 	api := e.Group("/api/v1")
 	api.GET("/ping", handlers.Ping)
@@ -58,8 +58,8 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	{
 		auth.POST("/sign-up", authHandler.SignUpUser)
 		auth.POST("/sign-in", authHandler.SignInUser)
-		auth.POST("/refresh-token", authHandler.RefreshToken)
-		auth.POST("/sign-out", authHandler.SignOutUser)
+		auth.GET("/refresh-token", authHandler.RefreshToken)
+		auth.GET("/sign-out", authHandler.SignOutUser)
 	}
 
 	if config.ServiceGet().Server.Frist {
@@ -77,7 +77,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 	}
 
 	data := api.Group("/data")
-	data.Use(authMiddleware.AuthRequired(), middleware.LicenseRequired())
+	data.Use(AuthMiddleware.AuthRequired(), middleware.LicenseRequired())
 	{
 		team := data.Group("/team")
 		{
@@ -131,7 +131,7 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 		}
 	}
 	actions := api.Group("/actions")
-	actions.Use(authMiddleware.AuthRequired(), middleware.LicenseRequired())
+	actions.Use(AuthMiddleware.AuthRequired(), middleware.LicenseRequired())
 	{
 		actions.POST("/reboot", actionsHandler.SendReboot)         // Перезагрузка
 		actions.POST("/shutdown", actionsHandler.SendShutdown)     // Выключение
@@ -143,6 +143,6 @@ func SetupRouter(e *echo.Echo, cfg *config.Config, log *logger.Logger, db *db.Da
 
 	}
 	// Подключаем фронтенд-маршруты
-	SetupFrontendRoutes(e)
+	SetupFrontendRoutes(e, AuthMiddleware.AuthRequired())
 
 }

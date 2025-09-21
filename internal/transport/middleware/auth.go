@@ -4,6 +4,8 @@ import (
 	"backend/internal/repository"
 	tokenjwt "backend/pkg/token_jwt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -22,41 +24,63 @@ func NewAuthMiddleware(authRepo *repository.AuthRepository) *AuthMiddleware {
 func (m *AuthMiddleware) AuthRequired() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cookie, err := c.Cookie("access_token")
-			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+			path := c.Request().URL.Path
+
+			// 1) Никогда не перехватываем сам refresh-эндпоинт, иначе петля
+			if path == "/api/v1/auth/refresh-token" {
+				return next(c)
 			}
 
-			if cookie.Value == "" {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+			// 2) Достаём access_token
+			cookie, err := c.Cookie("access_token")
+			if err != nil || cookie == nil || cookie.Value == "" {
+				return m.unauthorized(c)
 			}
 
 			claims, err := tokenjwt.DecodeJWT(cookie.Value)
 			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+				return m.unauthorized(c)
 			}
 
-			// Проверяем срок действия токена
+			// 3) Проверяем срок действия токена
 			if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+				return m.unauthorized(c)
 			}
 
+			// 4) Достаём пользователя и роль
 			user, err := m.authRepo.GetUserById(claims.UserID)
 			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+				return m.unauthorized(c)
 			}
-
-			// Получаем роль пользователя
 			role, err := m.authRepo.GetUserRole(user.RoleID)
 			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token")
+				return m.unauthorized(c)
 			}
 
-			// Устанавливаем ID пользователя и роль в контекст
+			// 5) Кладём в контекст
 			c.Set("user_id", user.ID)
 			c.Set("user_role", role.Name)
 
 			return next(c)
 		}
 	}
+}
+
+// Поведение при неавторизованности:
+// - для API: 401 JSON
+// - для страниц: редирект на /login
+func (m *AuthMiddleware) unauthorized(c echo.Context) error {
+	path := c.Request().URL.Path
+
+	// API → 401 JSON
+	if strings.HasPrefix(path, "/api/") {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"error":   "unauthorized",
+			"message": "Access token is missing or invalid",
+		})
+	}
+
+	// Страницы → редирект на refresh-token с next
+	next := url.QueryEscape(c.Request().URL.RequestURI())
+	return c.Redirect(http.StatusTemporaryRedirect, "/api/v1/auth/refresh-token?next="+next)
 }
