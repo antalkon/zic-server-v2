@@ -54,4 +54,12 @@ func SetupFrontendRoutes(e *echo.Echo) {
 		}
 		return c.Render(http.StatusOK, "dashboard", data)
 	})
+
+	// 5) кабинеты
+	e.GET("/rooms", func(c echo.Context) error {
+		data := echo.Map{
+			"Title": "Кабинеты",
+		}
+		return c.Render(http.StatusOK, "rooms", data)
+	})
 }
