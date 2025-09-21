@@ -2,46 +2,34 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ or .Title "Кабинеты" }}</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .hover-card { transition: all 0.3s ease; cursor: pointer; }
-    .hover-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); }
-    .room-card { position: relative; overflow: hidden; background-size: cover; background-position: center; height: 320px; }
-    .room-gradient { background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(0, 133, 255, 0.7) 75%, rgba(0, 133, 255, 0.9) 100%); transition: all 0.3s ease; }
-    .hover-card:hover .room-gradient { background: linear-gradient(180deg, transparent 0%, transparent 30%, rgba(0, 133, 255, 0.8) 65%, rgba(0, 133, 255, 1) 100%); }
-    .pagination-btn { transition: all 0.2s ease; }
-    .pagination-btn:hover:not(:disabled) { background-color: #0085FF; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 133, 255, 0.3); }
-    .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    @media (max-width: 640px) { .room-card { height: 280px; } }
-  </style>
+  <link rel="stylesheet" href="/static/css/rooms.css">
+  <script src="/static/js/rooms.js"></script>
 </head>
 <body class="min-h-screen bg-[#eef6ff]">
   <div class="flex min-h-screen">
-    <!-- Левая панель -->
     {{ template "nav_bar" . }}
-
-    <!-- Правая область -->
+    
     <div class="flex-1 flex flex-col">
       {{ template "header" . }}
-
-      <main class="px-4 sm:px-6 lg:px-8 pb-10">
+      
+      <main class="px-4 sm:px-6 lg:px-8 pb-10 pt-6">
         <div class="max-w-[1400px] mx-auto">
-          
-          <!-- Заголовок -->
           <h1 class="text-[28px] sm:text-[34px] md:text-[38px] font-extrabold leading-tight text-black mb-8">
             Кабинеты
           </h1>
-
-          <!-- Карточки кабинетов (рендерим из API) -->
+          
+          <!-- Rooms Grid Container -->
           <div id="rooms-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"></div>
-
-          <!-- Пагинация (пока не функциональна) -->
+          
+          <!-- Pagination -->
           <div class="mt-8 flex items-center justify-center">
             <div class="flex items-center gap-4">
-              <button class="pagination-btn bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
+              <button class="pagination-btn bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                      disabled>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -60,107 +48,10 @@
               </button>
             </div>
           </div>
-
         </div>
       </main>
     </div>
   </div>
-
-  <script>
-    // ДЕФОЛТНАЯ картинка для всех карточек (по твоему требованию)
-    const DEFAULT_BG = "https://images.unsplash.com/photo-1562774053-701939374585?w=1200&h=800&fit=crop&crop=center";
-
-    const STATUS_MAP = {
-      "active": "Активен",
-      "disabled": "Выключен",
-      "inactive": "Неактивен"
-    };
-
-    function cardHTML(room) {
-      const id = room?.id || "";
-      const number = room?.number ?? null;
-      const name = room?.name || "Кабинет";
-      const title = number ? `${number} Кабинет` : name;
-      const status = STATUS_MAP[(room?.status || "").toLowerCase()] || "Неизвестно";
-
-      // ПК-статистики в ответе нет — ставим прочерки
-      const pcsOnline = "—";
-      const pcsTotal = "—";
-
-      return `
-        <div class="hover-card room-card rounded-3xl shadow-xl overflow-hidden"
-             style="background-image: url('${DEFAULT_BG}')"
-             onclick="window.location.href='/rooms/${id}'">
-          <div class="room-gradient absolute inset-0 flex flex-col justify-end p-6 lg:p-8">
-            <div class="text-white">
-              <h3 class="text-[26px] lg:text-[30px] font-bold leading-none mb-3">${title}</h3>
-              <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                <div class="flex flex-col space-y-1 text-sm lg:text-base opacity-95">
-                  <span class="font-medium">ПК: ${pcsOnline} онлайн / ${pcsTotal} всего</span>
-                  <span>Статус: ${status}</span>
-                </div>
-                <button class="bg-white text-[#0085FF] font-semibold px-5 py-2.5 rounded-full text-sm lg:text-base hover:bg-opacity-95 transition-all flex items-center gap-2 w-fit shadow-lg">
-                  Перейти
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>`;
-    }
-
-    function attachHoverEffects(scopeEl) {
-      scopeEl.querySelectorAll('.room-card').forEach(card => {
-        card.addEventListener('mouseenter', () => {
-          card.style.transform = 'translateY(-6px) scale(1.02)';
-          card.style.boxShadow = '0 25px 50px rgba(0, 133, 255, 0.2)';
-        });
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = 'translateY(-4px) scale(1)';
-          card.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
-        });
-      });
-    }
-
-    async function renderRooms() {
-      const grid = document.getElementById("rooms-grid");
-      try {
-        const res = await fetch("/api/v1/data/room", { credentials: "include" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const rooms = await res.json();
-
-        if (!Array.isArray(rooms) || rooms.length === 0) {
-          grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-10">Данных нет</div>`;
-          return;
-        }
-
-        grid.innerHTML = rooms.map(cardHTML).join("");
-        attachHoverEffects(grid);
-      } catch (e) {
-        console.error("Failed to load rooms:", e);
-        grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-10">Ошибка загрузки. Данных нет</div>`;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", renderRooms);
-
-    // Пагинация остаётся декоративной (как просил)
-    let currentPage = 1;
-    const totalPages = 12;
-    const prevBtn = document.querySelector('.pagination-btn:first-child');
-    const nextBtn = document.querySelector('.pagination-btn:last-child');
-    const pageInfo = document.querySelector('span');
-
-    function updatePagination() {
-      if (!pageInfo) return;
-      pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
-      if (prevBtn) prevBtn.disabled = currentPage === 1;
-      if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-    }
-    updatePagination();
-  </script>
 </body>
 </html>
 {{ end }}

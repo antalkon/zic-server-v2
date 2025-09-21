@@ -1,0 +1,9 @@
+.hover-card { transition: all 0.3s ease; cursor: pointer; }
+    .hover-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); }
+    .room-card { position: relative; overflow: hidden; background-size: cover; background-position: center; height: 320px; }
+    .room-gradient { background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(0, 133, 255, 0.7) 75%, rgba(0, 133, 255, 0.9) 100%); transition: all 0.3s ease; }
+    .hover-card:hover .room-gradient { background: linear-gradient(180deg, transparent 0%, transparent 30%, rgba(0, 133, 255, 0.8) 65%, rgba(0, 133, 255, 1) 100%); }
+    .pagination-btn { transition: all 0.2s ease; }
+    .pagination-btn:hover:not(:disabled) { background-color: #0085FF; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 133, 255, 0.3); }
+    .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    @media (max-width: 640px) { .room-card { height: 280px; } }
